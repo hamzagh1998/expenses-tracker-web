@@ -1,0 +1,19 @@
+/* src/fonts.css */
+
+@font-face {
+  font-family: "Regular";
+  src: url("./styles/fonts/Poppins/Poppins-Regular.ttf") format("truetype");
+  /* Add more @font-face rules for other font weights or styles if applicable */
+}
+
+@font-face {
+  font-family: "Bold";
+  src: url("./styles/fonts/Poppins/Poppins-Bold.ttf") format("truetype");
+  /* Add more @font-face rules for other font weights or styles if applicable */
+}
+
+@font-face {
+  font-family: "MochiyRegular";
+  src: url("./styles/fonts/Mochiy_Pop_One/MochiyPopOne-Regular.ttf") format("truetype");
+  /* Add more @font-face rules for other font weights or styles if applicable */
+}
