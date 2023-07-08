@@ -1,12 +1,15 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { Helmet } from "react-helmet";
 import { ThemeProvider } from "styled-components";
 import { App } from "./App";
 import "./index.css";
+import "./fonts.css"
 import reportWebVitals from "./reportWebVitals";
 
 import { lightTheme } from "./styles/themes/light.theme";
 import { darkTheme } from "./styles/themes/dark.theme";
+import { sizes } from "./styles/sizes";
 import { GlobalStyles } from "./global-styles";
 
 const root = ReactDOM.createRoot(
@@ -15,8 +18,12 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <React.StrictMode>
-    <ThemeProvider theme={lightTheme}>
+    <ThemeProvider theme={{currentTheme: lightTheme, sizes}}>
       <>
+        <Helmet>
+          <link rel="stylesheet" href="./fonts.css" />
+          {/* Add more <link> tags if needed */}
+        </Helmet>
         <GlobalStyles />
         <App />
       </>
