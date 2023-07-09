@@ -63,7 +63,7 @@ const IconWrapper = styled.div<Pick<Props, "iconPosition"> & { spin?: boolean }>
 `;
 
 
-export function Button({
+export function ButtonComponent({
   text,
   height=26,
   width=330,

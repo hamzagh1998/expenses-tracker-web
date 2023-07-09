@@ -11,7 +11,7 @@ export function RoutersNavigator() {
 
   const currentPath = location.pathname;
 
-  const authRoutes = ["/auth/login", "/auth/register"];
+  const authRoutes = ["/auth/login", "/auth/register", "/auth/reset-password"];
 
   useEffect(() => {
     if (!isLoggedIn && !authRoutes.includes(currentPath)) navigate("/auth/login");

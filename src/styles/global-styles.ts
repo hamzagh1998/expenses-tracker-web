@@ -66,6 +66,7 @@ export const FlexContainer = styled.div`
   display: flex;
   font-family: Regular;
   justify-content: space-between;
+  color: ${({theme}) => theme.currentTheme.textColor};
   gap: 2.5px;
   align-items: center;
   font-size: 12px;
@@ -76,13 +77,14 @@ export const FlexContainer = styled.div`
 export const OrLine = styled.div`
   width: 100%;
   height: .1px;
-  background-color: #404E63;
+  background-color: ${({theme}) => theme.currentTheme.textColor};
   opacity: .3;
 `
 
 export const GoogleButton = styled.div`
   display: flex;
   font-family: Regular;
+  color: ${({theme}) => theme.currentTheme.textColor};
   justify-content: center;
   align-items: center;
   gap: 24px;
@@ -94,5 +96,23 @@ export const GoogleButton = styled.div`
 
   &:hover {
     background-color: #f9f9f9;
+    color: ${({theme}) => theme.currentTheme.primaryColorHover};
   }
+`;
+
+export const PolicyText = styled.div`
+  font-family: Regular;
+  font-size: 12px;
+  font-weight: normal;
+  max-width: 350px;
+`;
+
+export const InputsWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: fit-content;
+  margin: 0;
+  padding: 0;
 `;

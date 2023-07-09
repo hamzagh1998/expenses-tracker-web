@@ -8,10 +8,10 @@ import { ImSpinner2 } from "react-icons/im";
 import { AuthContainer, AuthLogoContainer, AuthQuestionText, AuthTypeText, FlexContainer, GoogleButton, LinkText, OrLine } from "../../../styles/global-styles";
 import { Spacer } from "../../../components/spacer/spacer";
 import { GenericBoxComponent } from "../../../components/genaric-box/generic-box.component";
+import { InputComponent } from "../../../components/input/input.component";
+import { ButtonComponent } from "../../../components/button/button.component";
 
 import logo from "../../../assets/logo.png";
-import { InputComponent } from "../../../components/input/input.component";
-import { Button } from "../../../components/button/button";
 
 
 export function LoginPage() {
@@ -71,7 +71,7 @@ export function LoginPage() {
         <Spacer size="small" />
         <FlexContainer>
           <div></div>
-          <LinkText>Forgot your password?</LinkText>
+          <LinkText href="/auth/reset-password">Forgot your password?</LinkText>
         </FlexContainer>
         <Spacer size="large" />
         <FlexContainer>
@@ -85,7 +85,7 @@ export function LoginPage() {
           Sign in with Google
         </GoogleButton>
         <Spacer size="large" />
-        <Button 
+        <ButtonComponent 
           text="Log in" 
           iconPosition="right"
           spin={true}

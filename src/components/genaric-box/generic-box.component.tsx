@@ -14,8 +14,8 @@ interface Props {
 }
 
 const Container = styled.div<Props>`
-  height: ${({ height }) => height}px;
-  width: ${({ width }) => width}px;
+  min-height: ${({ height }) => height}px;
+  min-width: ${({ width }) => width}px;
   background-color: ${({ bgColor }) => bgColor};
   padding: ${({ padding }) =>
     typeof padding === "number" ? padding + "px" : padding};
