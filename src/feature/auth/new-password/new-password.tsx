@@ -1,7 +1,10 @@
-import React, { useState } from "react";
-import { sendPasswordResetEmail } from "firebase/auth";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { confirmPasswordReset } from "firebase/auth";
 import { useTheme } from "styled-components";
 import { ImSpinner2 } from "react-icons/im";
+import { BsEye } from "react-icons/bs";
+import { PiEyeClosedLight } from "react-icons/pi";
 
 import { auth } from "../../../firebase";
 
@@ -9,9 +12,8 @@ import { Spacer } from "../../../components/spacer/spacer";
 import { GenericBoxComponent } from "../../../components/genaric-box/generic-box.component";
 import { InputComponent } from "../../../components/input/input.component";
 import { ButtonComponent } from "../../../components/button/button.component";
-import { BackComponent } from "../../../components/back/back.component";
 
-import { AuthContainer, AuthLogoContainer, AuthTypeText, ErrorText, SuccessText } from "../../../styles/global-styles";
+import { AuthContainer, AuthLogoContainer, AuthTypeText, ErrorText, LinkText, SuccessText } from "../../../styles/global-styles";
 import { HintText } from "./styles";
 
 import logo from "../../../assets/logo.png";
@@ -19,9 +21,16 @@ import logo from "../../../assets/logo.png";
 import { tryToCatch } from "../../../utils/try-to-catch";
 
 
-export function ResetPasswordPage() {
+export function NewPasswordPage() {
 
-  const [email, setEmail] = useState("");
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+
+  const [showPwd, setShowPwd] = useState(false);
+  const [showConPwd, setShowConPwd] = useState(false);
 
   const [isLoding, setIsLoading] = useState(false);
   const [success, setSuccess] = useState("");
@@ -29,20 +38,25 @@ export function ResetPasswordPage() {
 
   const theme: any = useTheme();  
 
-  const onSendResetEmail = async () => {
+  let oobCode: string | null = searchParams.get("oobCode");
+  
+  useEffect(() => {
+    if (!oobCode) navigate("/auth/login");
+  }, [oobCode]);
+
+  const onUpdatePassword = async () => {
     setIsLoading(true);
-    const [error, _] = await tryToCatch(sendPasswordResetEmail, auth, email);
+    const [error, _] = await tryToCatch(confirmPasswordReset, auth, oobCode, newPassword);
     if (error) {
       const errorCode = error.code;
-      const errorType = errorCode.split("/")[1];      
-      const emailError = "Incorrect email. Please enter it again."
-      const passwordError = "Incorrect password. Please enter it again."      
-      setError(errorType === "invalid-email" ? emailError : passwordError);
-      setEmail("");
+      const errorType = errorCode.split("/")[1]; 
+      setError(errorType === "invalid-action-code" ? "Invalid action" : "Something went wrong!");
+      setNewPassword("");
+      setConfirmNewPassword(""); 
     } else {
-      setSuccess("An email containing a reset link has been sent to your email address!  If you don't see the email in your inbox, please check your spam or junk folder.");
+      setSuccess("Your new password has been saved!");
     };
-    setIsLoading(false);
+    setIsLoading(false)
   };
 
   return (
@@ -53,7 +67,7 @@ export function ResetPasswordPage() {
       </AuthLogoContainer>
       <Spacer size="medium" />
       <GenericBoxComponent 
-        height={338} 
+        height={348} 
         width={410} 
         vCentred={true}
         hCentred={true}
@@ -62,16 +76,15 @@ export function ResetPasswordPage() {
         bgColor={theme.currentTheme.backgroundColor}
         shadow="2px 2px 4px rgba(0, 0, 0, 0.2)"
       >
-        <BackComponent />
         <Spacer size="large" />
         <AuthTypeText>
-          password Reset
+          New password
         </AuthTypeText>
-        <Spacer size="large" />
+        <Spacer size="medium" />
         <HintText>
-          Forgot your password? No problem! Just enter the email address that you signed up with to reset it.
+          Please enter your new password and confirm it.
         </HintText>
-        <Spacer size="small" />
+        <Spacer size="large" />
         {
           success.length && !error.length
             ? <GenericBoxComponent 
@@ -83,11 +96,13 @@ export function ResetPasswordPage() {
                   bgColor={theme.currentTheme.successBackgroundColor}
               >
                 <SuccessText>
-                  {success}
+                  {success} &ensp;
+                  <LinkText href="/auth/login">Login</LinkText>
                 </SuccessText>
               </GenericBoxComponent>
             : <></>
         }
+        <Spacer size="small" />
         {
           error.length
             ? <GenericBoxComponent 
@@ -104,21 +119,37 @@ export function ResetPasswordPage() {
               </GenericBoxComponent>
             : <></>
         }
+        <InputComponent
+          type={showPwd ? "text" : "password"}
+          value={newPassword}
+          placeholder="New Password"
+          setValue={setNewPassword}  
+          icon={
+            showPwd 
+              ? <BsEye size={20} onClick={() => setShowPwd(false)} /> 
+              : <PiEyeClosedLight size={20} onClick={() => setShowPwd(true)}/>
+          }        
+        />
         <Spacer size="small" />
         <InputComponent
-          type="email"
-          value={email}
-          placeholder="Email"
-          setValue={setEmail}        
+          type={showConPwd ? "text" : "password"}
+          value={confirmNewPassword}
+          placeholder="Confirm Password"
+          setValue={setConfirmNewPassword}   
+          icon={
+            showConPwd 
+              ? <BsEye size={20} onClick={() => setShowConPwd(false)} /> 
+              : <PiEyeClosedLight size={20} onClick={() => setShowConPwd(true)}/>
+          }       
         />
-        <Spacer size="large" />
+        <Spacer size="medium" />
         <ButtonComponent 
-          text="Send reset link" 
+          text="Change Password" 
           iconPosition="right"
           spin={true}
           disabled={error.length > 0}
           icon={isLoding ? <ImSpinner2 size={20} /> : null} 
-          onClick={error.length ? () => null : onSendResetEmail}
+          onClick={error.length ? () => null : onUpdatePassword}
         />
       </GenericBoxComponent>
     </AuthContainer>

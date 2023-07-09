@@ -1,17 +1,23 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { useTheme } from "styled-components";
 import { BsEye } from "react-icons/bs";
 import { PiEyeClosedLight } from "react-icons/pi";
 import { FcGoogle } from "react-icons/fc";
 import { ImSpinner2 } from "react-icons/im";
 
-import { AuthContainer, AuthLogoContainer, AuthQuestionText, AuthTypeText, FlexContainer, GoogleButton, LinkText, OrLine } from "../../../styles/global-styles";
+import { auth } from "../../../firebase";
+
+import { AuthContainer, AuthLogoContainer, AuthQuestionText, AuthTypeText, ErrorText, FlexContainer, GoogleButton, LinkText, OrLine } from "../../../styles/global-styles";
 import { Spacer } from "../../../components/spacer/spacer";
 import { GenericBoxComponent } from "../../../components/genaric-box/generic-box.component";
 import { InputComponent } from "../../../components/input/input.component";
 import { ButtonComponent } from "../../../components/button/button.component";
 
 import logo from "../../../assets/logo.png";
+
+import { tryToCatch } from "../../../utils/try-to-catch";
 
 
 export function LoginPage() {
@@ -24,6 +30,20 @@ export function LoginPage() {
   const [error, setError] = useState("");
 
   const theme: any = useTheme();  
+
+  const onLogin = async () => {
+    setIsLoading(true);
+    setError("");
+    const [error, _] = await tryToCatch(signInWithEmailAndPassword, auth, email, password);
+    if (error) {
+      const errorCode = error.code;
+      const errorType = errorCode.split("/")[1];
+      const emailError = "Incorrect email. Please enter it again."
+      const passwordError = "Incorrect password. Please enter it again."      
+      setError(errorType === "invalid-email" ? emailError : passwordError);
+    }
+    setIsLoading(false);
+  };
 
   return (
     <AuthContainer>
@@ -43,12 +63,29 @@ export function LoginPage() {
       >
         <Spacer size="large" />
         <AuthTypeText>
-          Log in
+          Sign in
         </AuthTypeText>
         <Spacer size="large" />
         <AuthQuestionText>
           New to Expenses Tracker? <LinkText href="/auth/register">Create an account</LinkText> 
         </AuthQuestionText>
+        <Spacer size="large" />
+        {
+          error.length
+            ? <GenericBoxComponent 
+                  height={48} 
+                  width={300} 
+                  vCentred={false}
+                  padding={18}
+                  borderRadius={12} 
+                  bgColor={theme.currentTheme.errorBackgroundColor}
+              >
+                <ErrorText>
+                  {error}
+                </ErrorText>
+              </GenericBoxComponent>
+            : <></>
+        }
         <Spacer size="large" />
         <InputComponent
           type="email"
@@ -86,12 +123,12 @@ export function LoginPage() {
         </GoogleButton>
         <Spacer size="large" />
         <ButtonComponent 
-          text="Log in" 
+          text="Sign in" 
           iconPosition="right"
           spin={true}
-          icon={isLoding ? <ImSpinner2 size={20} onClick={() => setShowPwd(true)}/> : null} 
+          icon={isLoding ? <ImSpinner2 size={20} /> : null} 
           disabled={error.length > 0}
-          onClick={error.length ? () => null : () => null}
+          onClick={error.length ? () => null : onLogin}
         />
       </GenericBoxComponent>
     </AuthContainer>

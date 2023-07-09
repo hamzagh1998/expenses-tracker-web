@@ -100,20 +100,17 @@ export const GoogleButton = styled.div`
   }
 `;
 
-export const PolicyText = styled.div`
+export const ErrorText = styled.p`
   font-family: Regular;
-  color: ${({theme}) => theme.currentTheme.textColor};
-  font-size: 12px;
-  font-weight: normal;
-  max-width: 350px;
+  font-size: ${({theme}) => theme.sizes.fonts.small};
+  color: ${({theme}) => theme.currentTheme.errorText};
+  max-width: 300px;
 `;
 
-export const InputsWrapper = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  height: fit-content;
-  margin: 0;
-  padding: 0;
+
+export const SuccessText = styled.p`
+  font-family: Regular;
+  font-size: ${({theme}) => theme.sizes.fonts.small};
+  color: ${({theme}) => theme.currentTheme.SuccessText};
+  max-width: 300px;
 `;

@@ -1,7 +1,10 @@
 import React, { useState } from "react";
+import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import { useTheme } from "styled-components";
+import { object, string } from "yup";
 
-import { AuthContainer, AuthLogoContainer, AuthQuestionText, AuthTypeText, FlexContainer, GoogleButton, InputsWrapper, LinkText, OrLine, PolicyText } from "../../../styles/global-styles";
+import { auth } from "../../../firebase";
+
 import { GenericBoxComponent } from "../../../components/genaric-box/generic-box.component";
 import { Spacer } from "../../../components/spacer/spacer";
 import { InputComponent } from "../../../components/input/input.component";
@@ -11,7 +14,12 @@ import { FcGoogle } from "react-icons/fc";
 import { ButtonComponent } from "../../../components/button/button.component";
 import { ImSpinner2 } from "react-icons/im";
 
+import { AuthContainer, AuthLogoContainer, AuthQuestionText, AuthTypeText, ErrorText, FlexContainer, GoogleButton, LinkText, OrLine } from "../../../styles/global-styles";
+import { InputsWrapper, PolicyText } from "./styles";
+
 import logo from "../../../assets/logo.png";
+
+import { tryToCatch } from "../../../utils/try-to-catch";
 
 
 export function RegisterPage() {
@@ -24,7 +32,41 @@ export function RegisterPage() {
   const [isLoding, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
+  const [inputsError, setInputsError] = useState({
+    firstName: false,
+    lastName: false,
+    email: false,
+    password: false
+  });
+
   const theme: any = useTheme();  
+
+  let registerSchema = object({
+    firstName: string().required(),
+    lastName: string().required(),
+    email: string().email().required(),
+    password: string().min(6).required(),
+  });
+
+  // const validate = () => {
+  //   registerSchema.isValid()
+  // };
+
+  const onRegister = async () => {
+    setIsLoading(true);
+    setError("");
+    const [error, userCredential] = await tryToCatch(createUserWithEmailAndPassword, auth, email, password);
+    if (error) {
+      const errorCode = error.code;
+      const errorType = errorCode.split("/")[1];
+      console.log(errorType);
+      
+      setError(errorType === "email-already-in-use" ? "Email address already exists" : "Something went wrong please check your network then try again!");
+    } else {
+      await sendEmailVerification(userCredential.user);
+    };
+    setIsLoading(false);
+  };
 
   return (
     <AuthContainer>
@@ -44,13 +86,30 @@ export function RegisterPage() {
       >
         <Spacer size="large" />
         <AuthTypeText>
-          Register
+          Sign up
         </AuthTypeText>
         <Spacer size="large" />
         <AuthQuestionText>
-          Already have an account? <LinkText href="/auth/login">Login</LinkText> 
+          Already have an account? <LinkText href="/auth/login">Sign in</LinkText> 
         </AuthQuestionText>
         <Spacer size="large" />
+        {
+          error.length
+            ? <GenericBoxComponent 
+                  height={48} 
+                  width={300} 
+                  vCentred={false}
+                  padding={18}
+                  borderRadius={12} 
+                  bgColor={theme.currentTheme.errorBackgroundColor}
+              >
+                <ErrorText>
+                  {error}
+                </ErrorText>
+              </GenericBoxComponent>
+            : <></>
+        }
+        <Spacer size="medium" />
         <InputsWrapper>
           <InputComponent
             type="text"
@@ -95,16 +154,16 @@ export function RegisterPage() {
         <Spacer size="large" />
         <GoogleButton>
           <FcGoogle size={26} />
-          Sign in with Google
+          Sign up with Google
         </GoogleButton>
         <Spacer size="large" />
         <ButtonComponent 
-          text="Register" 
+          text="Sign up" 
           iconPosition="right"
           spin={true}
-          icon={isLoding ? <ImSpinner2 size={20} onClick={() => setShowPwd(true)}/> : null} 
+          icon={isLoding ? <ImSpinner2 size={20} /> : null} 
           disabled={error.length > 0}
-          onClick={error.length ? () => null : () => null}
+          onClick={error.length || isLoding ? () => null : onRegister}
         />
         <Spacer />
         <PolicyText>
