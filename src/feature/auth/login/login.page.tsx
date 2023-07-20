@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { useTheme } from "styled-components";
 import { BsEye } from "react-icons/bs";
 import { PiEyeClosedLight } from "react-icons/pi";
 import { FcGoogle } from "react-icons/fc";
 import { ImSpinner2 } from "react-icons/im";
 
-import { auth } from "../../../firebase";
+import { auth, googleProvider } from "../../../firebase";
 
 import { AuthContainer, AuthLogoContainer, AuthQuestionText, AuthTypeText, ErrorText, FlexContainer, GoogleButton, LinkText, OrLine } from "../../../styles/global-styles";
 import { Spacer } from "../../../components/spacer/spacer";
@@ -43,6 +42,23 @@ export function LoginPage() {
       setError(errorType === "invalid-email" ? emailError : passwordError);
     }
     setIsLoading(false);
+  };
+
+  const onGoogleSignIn = async () => {
+    const [error, data] = await tryToCatch(signInWithPopup, auth, googleProvider);
+    if (error) {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      // The email of the user's account used.
+      const email = error.customData.email;
+      // The AuthCredential type that was used.
+      const credential = GoogleAuthProvider.credentialFromError(error);
+    };
+    // This gives you a Google Access Token. You can use it to access the Google API.
+    const credential = GoogleAuthProvider.credentialFromResult(data);
+    const token = credential!.accessToken;
+    // The signed-in user info.
+    const user = data.user;
   };
 
   return (
@@ -117,7 +133,7 @@ export function LoginPage() {
           <OrLine />
         </FlexContainer>
         <Spacer size="large" />
-        <GoogleButton>
+        <GoogleButton onClick={onGoogleSignIn}>
           <FcGoogle size={26} />
           Sign in with Google
         </GoogleButton>

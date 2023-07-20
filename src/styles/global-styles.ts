@@ -105,6 +105,7 @@ export const ErrorText = styled.p`
   font-size: ${({theme}) => theme.sizes.fonts.small};
   color: ${({theme}) => theme.currentTheme.errorText};
   max-width: 300px;
+  margin: 0;
 `;
 
 
@@ -113,4 +114,5 @@ export const SuccessText = styled.p`
   font-size: ${({theme}) => theme.sizes.fonts.small};
   color: ${({theme}) => theme.currentTheme.SuccessText};
   max-width: 300px;
+  margin: 0;
 `;

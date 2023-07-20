@@ -10,10 +10,11 @@ interface Props {
   type?: InputType;
   value?: string | number | readonly string[] | undefined;
   placeholder?: string;
-  setValue: Dispatch<SetStateAction<string>>;
+  setValue: Function;
   icon?: React.ReactNode;
   borderColor?: string;
   borderColorActive?: string;
+  error?: boolean;
 }
 
 const InputWrapper = styled.div`
@@ -24,13 +25,13 @@ const InputWrapper = styled.div`
   padding: 0;
 `;
 
-const Input = styled.input<Pick<Props, "height" | "width" | "borderRadius">>`
+const Input = styled.input<Pick<Props, "height" | "width" | "borderRadius" | "borderColor" | "error">>`
   height: ${({ height }) => height}px;
   width: ${({ width }) => width}px;
   border-radius: ${({ borderRadius }) => borderRadius}px;
   font-size: ${({ theme }) => theme.sizes.fonts.large};
   background-color: #f3f6f8;
-  border: 2px solid rgba(217, 224, 230);
+  border: ${({borderColor, error, theme}) => "2px solid " + (error ? theme.currentTheme.errorText : borderColor)};
   padding: 0 10px;
   transition: border-color 0.3s ease;
   position: relative;
@@ -63,7 +64,9 @@ export function InputComponent({
   value,
   placeholder="",
   setValue,
-  icon = null,
+  icon=null,
+  borderColor="rgba(217, 224, 230)",
+  error=false
 }: Props) {
   return (
     <InputWrapper>
@@ -74,6 +77,8 @@ export function InputComponent({
         type={type}
         value={value}
         placeholder={placeholder}
+        borderColor={borderColor}
+        error={error}
         onChange={(e) => setValue(e.target.value)}
       />
       {icon ? <IconWrapper>{icon}</IconWrapper> : null}

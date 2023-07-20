@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { useTheme } from "styled-components";
 import { object, string } from "yup";
 
-import { auth } from "../../../firebase";
+import { auth, googleProvider } from "../../../firebase";
 
 import { GenericBoxComponent } from "../../../components/genaric-box/generic-box.component";
 import { Spacer } from "../../../components/spacer/spacer";
@@ -23,50 +23,90 @@ import { tryToCatch } from "../../../utils/try-to-catch";
 
 
 export function RegisterPage() {
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+
+  const [inputsInfo, setInputsInfo] = useState({firstName: "", lastName: "", email: "", password: ""});
+  const [inputsError, setInputsError] = useState({firstName: "", lastName: "", email: "", password: ""});
   const [showPwd, setShowPwd] = useState(false);
 
   const [isLoding, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const [inputsError, setInputsError] = useState({
-    firstName: false,
-    lastName: false,
-    email: false,
-    password: false
-  });
 
   const theme: any = useTheme();  
 
   let registerSchema = object({
-    firstName: string().required(),
-    lastName: string().required(),
-    email: string().email().required(),
-    password: string().min(6).required(),
+    firstName: string().required("First name is required!"),
+    lastName: string().required("Last name is required!"),
+    email: string().email("Pls enter a valid email address!").required("Email is required!"),
+    password: string().min(6).required("Password is required!"),
   });
 
-  // const validate = () => {
-  //   registerSchema.isValid()
-  // };
+  const handleInput = async (attribute: string, value: string) => {
+    setInputsInfo(inputsInfo => ({...inputsInfo, ...{[attribute]: value}}));
+    const [error, _] = await tryToCatch(registerSchema.validateAt, attribute, {[attribute]: value});
+    setInputsError(inputsError => ({...inputsError, ...{[attribute]: ""}}));
+    if (error) {
+      setInputsError(inputsError => ({...inputsError, ...{[error.path]: error.message}}));
+    };
+  };
 
-  const onRegister = async () => {
-    setIsLoading(true);
-    setError("");
-    const [error, userCredential] = await tryToCatch(createUserWithEmailAndPassword, auth, email, password);
+  const onRegister = async () => {    
+  setIsLoading(true);
+  setError("");
+  setInputsError({ firstName: "", lastName: "", email: "", password: "" });
+  try {
+    await registerSchema.validate(inputsInfo, { abortEarly: false });
+    const { email, password } = inputsInfo;
+    const [error, userCredential] = await tryToCatch(
+      createUserWithEmailAndPassword,
+      auth,
+      email,
+      password
+    );
     if (error) {
       const errorCode = error.code;
       const errorType = errorCode.split("/")[1];
-      console.log(errorType);
-      
-      setError(errorType === "email-already-in-use" ? "Email address already exists" : "Something went wrong please check your network then try again!");
+      errorType === "invalid-email"
+        ? setInputsError({...inputsError, email: "Pls enter a valid email address!"})
+        : setError(
+          errorType === "email-already-in-use"
+            ? "Email address already exists"
+            : "Something went wrong please check your network then try again!"
+        );
     } else {
       await sendEmailVerification(userCredential.user);
+    }
+  } catch (err: any) {
+    const pathToMessage = err.inner.reduce((acc: any, error: any) => {
+      acc[error.path] = error.message;
+      return acc;
+    }, {});
+
+    setInputsError({
+      ...inputsError,
+      ...pathToMessage,
+    });
+  }
+  setIsLoading(false);
+};
+
+
+  const onGoogleSignup = async () => {
+    const [error, data] = await tryToCatch(signInWithPopup, auth, googleProvider);
+    if (error) {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      // The email of the user's account used.
+      const email = error.customData.email;
+      // The AuthCredential type that was used.
+      const credential = GoogleAuthProvider.credentialFromError(error);
     };
-    setIsLoading(false);
-  };
+    // This gives you a Google Access Token. You can use it to access the Google API.
+    const credential = GoogleAuthProvider.credentialFromResult(data);
+    const token = credential!.accessToken;
+    // The signed-in user info.
+    const user = data.user;
+  };  
 
   return (
     <AuthContainer>
@@ -111,40 +151,64 @@ export function RegisterPage() {
         }
         <Spacer size="medium" />
         <InputsWrapper>
-          <InputComponent
-            type="text"
-            width={150}
-            value={firstName}
-            placeholder="First name"
-            setValue={setFirstName}        
-          />
-          <InputComponent
-            type="text"
-            width={150}
-            value={lastName}
-            placeholder="Last name"
-            setValue={setLastName}        
-          />
+          <div>
+            <InputComponent
+              type="text"
+              width={150}
+              value={inputsInfo.firstName}
+              placeholder="First name"
+              error={inputsError.firstName.length > 0}
+              setValue={(value: string) => handleInput("firstName", value)}    
+            />
+            { inputsError.firstName 
+              ? <ErrorText style={{color: "#f00"}}>{inputsError.firstName}</ErrorText>
+              : null
+            }
+          </div>
+          <div>
+            <InputComponent
+              type="text"
+              width={150}
+              value={inputsInfo.lastName}
+              placeholder="Last name"
+              error={inputsError.lastName.length > 0}
+              setValue={(value: string) => handleInput("lastName", value)}        
+            />
+            { inputsError.lastName 
+                ? <ErrorText style={{color: "#f00"}}>{inputsError.lastName}</ErrorText>
+                : null
+            }
+          </div>
         </InputsWrapper>
         <Spacer size="medium" />
         <InputComponent
           type="email"
-          value={email}
+          value={inputsInfo.email}
           placeholder="Email"
-          setValue={setEmail}        
+          error={inputsError.email.length > 0}
+          setValue={(value: string) => handleInput("email", value)}        
         />
+        { inputsError.email 
+            ? <ErrorText style={{color: "#f00"}}>{inputsError.email}</ErrorText>
+            : null
+        }
         <Spacer size="medium" />
         <InputComponent
           type={showPwd ? "text" : "password"}
-          value={password}
+          value={inputsInfo.password}
           placeholder="Password"
-          setValue={setPassword}  
+          error={inputsError.password.length > 0}
+          setValue={(value: string) => handleInput("password", value)}  
           icon={
             showPwd 
               ? <BsEye size={20} onClick={() => setShowPwd(false)} /> 
               : <PiEyeClosedLight size={20} onClick={() => setShowPwd(true)}/>
           }      
         />
+        { inputsError.password 
+            ? <ErrorText style={{color: "#f00"}}>{inputsError.password}</ErrorText>
+            : null
+        }
         <Spacer size="large" />
         <FlexContainer>
           <OrLine />
@@ -152,7 +216,7 @@ export function RegisterPage() {
           <OrLine />
         </FlexContainer>
         <Spacer size="large" />
-        <GoogleButton>
+        <GoogleButton onClick={onGoogleSignup}>
           <FcGoogle size={26} />
           Sign up with Google
         </GoogleButton>
@@ -162,8 +226,7 @@ export function RegisterPage() {
           iconPosition="right"
           spin={true}
           icon={isLoding ? <ImSpinner2 size={20} /> : null} 
-          disabled={error.length > 0}
-          onClick={error.length || isLoding ? () => null : onRegister}
+          onClick={onRegister}
         />
         <Spacer />
         <PolicyText>
