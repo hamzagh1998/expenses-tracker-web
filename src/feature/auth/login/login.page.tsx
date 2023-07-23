@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { object, string } from "yup";
 import { useTheme } from "styled-components";
 import { BsEye } from "react-icons/bs";
 import { PiEyeClosedLight } from "react-icons/pi";
@@ -21,8 +22,8 @@ import { tryToCatch } from "../../../utils/try-to-catch";
 
 export function LoginPage() {
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [inputsInfo, setInputsInfo] = useState({email: "", password: ""});
+  const [inputsError, setInputsError] = useState({email: "", password: ""});
   const [showPwd, setShowPwd] = useState(false);
 
   const [isLoding, setIsLoading] = useState(false);
@@ -30,19 +31,52 @@ export function LoginPage() {
 
   const theme: any = useTheme();  
 
+  let loginSchema = object({
+    email: string().email("Pls enter a valid email address!").required("Email is required!"),
+    password: string().min(6).required("Password is required!"),
+  });
+
+  const handleInput = async (attribute: string, value: string) => {
+    setInputsInfo(inputsInfo => ({...inputsInfo, ...{[attribute]: value}}));
+    const [error, _] = await tryToCatch(loginSchema.validateAt, attribute, {[attribute]: value});
+    setInputsError(inputsError => ({...inputsError, ...{[attribute]: ""}}));
+    if (error) {
+      setInputsError(inputsError => ({...inputsError, ...{[error.path]: error.message}}));
+    };
+  };
+
   const onLogin = async () => {
     setIsLoading(true);
     setError("");
-    const [error, _] = await tryToCatch(signInWithEmailAndPassword, auth, email, password);
-    if (error) {
-      const errorCode = error.code;
-      const errorType = errorCode.split("/")[1];
-      const emailError = "Incorrect email. Please enter it again."
-      const passwordError = "Incorrect password. Please enter it again."      
-      setError(errorType === "invalid-email" ? emailError : passwordError);
-    }
-    setIsLoading(false);
+    setInputsError({ email: "", password: "" });
+    const [validationError, __] = await tryToCatch(loginSchema.validate, inputsInfo, { abortEarly: false });
+
+    // Check if there are validation errors before proceeding
+    try {
+      await loginSchema.validate(inputsInfo, { abortEarly: false });
+      const [error, _] = await tryToCatch(signInWithEmailAndPassword, auth, inputsInfo.email, inputsInfo.password);
+      if (error) {
+        const errorCode = error.code;
+        const errorType = errorCode.split("/")[1];
+        const emailError = "Incorrect email. Please enter it again."
+        const passwordError = "Incorrect password. Please enter it again."      
+        setError(errorType === "invalid-email" ? emailError : passwordError);
+      };
+    } catch(err: any) {
+      const pathToMessage = err.inner.reduce((acc: any, error: any) => {
+        acc[error.path] = error.message;
+        return acc;
+      }, {});
+
+      setInputsError({
+        ...inputsError,
+        ...pathToMessage,
+      });
+    } finally {
+      setIsLoading(false);
+    };
   };
+  
 
   const onGoogleSignIn = async () => {
     const [error, data] = await tryToCatch(signInWithPopup, auth, googleProvider);
@@ -91,7 +125,6 @@ export function LoginPage() {
             ? <GenericBoxComponent 
                   height={48} 
                   width={300} 
-                  vCentred={false}
                   padding={18}
                   borderRadius={12} 
                   bgColor={theme.currentTheme.errorBackgroundColor}
@@ -103,24 +136,38 @@ export function LoginPage() {
             : <></>
         }
         <Spacer size="large" />
-        <InputComponent
-          type="email"
-          value={email}
-          placeholder="Email"
-          setValue={setEmail}        
-        />
+        <div>
+          <InputComponent
+            type="email"
+            value={inputsInfo.email}
+            placeholder="Email"
+            error={inputsError.email.length > 0}
+            setValue={(value: string) => handleInput("email", value)}        
+          />
+          { inputsError.email 
+            ? <ErrorText style={{color: "#f00"}}>{inputsError.email}</ErrorText>
+            : null
+          }
+        </div>
         <Spacer size="medium" />
-        <InputComponent
-          type={showPwd ? "text" : "password"}
-          value={password}
-          placeholder="Password"
-          setValue={setPassword}  
-          icon={
-            showPwd 
-              ? <BsEye size={20} onClick={() => setShowPwd(false)} /> 
-              : <PiEyeClosedLight size={20} onClick={() => setShowPwd(true)}/>
-          }      
-        />
+        <div>
+          <InputComponent
+            type={showPwd ? "text" : "password"}
+            value={inputsInfo.password}
+            placeholder="Password"
+            setValue={(value: string) => handleInput("password", value)}      
+            error={inputsError.password.length > 0}  
+            icon={
+              showPwd 
+                ? <BsEye size={20} onClick={() => setShowPwd(false)} /> 
+                : <PiEyeClosedLight size={20} onClick={() => setShowPwd(true)}/>
+            }      
+          />
+          { inputsError.password 
+            ? <ErrorText style={{color: "#f00"}}>{inputsError.password}</ErrorText>
+            : null
+          }
+        </div>
         <Spacer size="small" />
         <FlexContainer>
           <div></div>
@@ -143,8 +190,7 @@ export function LoginPage() {
           iconPosition="right"
           spin={true}
           icon={isLoding ? <ImSpinner2 size={20} /> : null} 
-          disabled={error.length > 0}
-          onClick={error.length ? () => null : onLogin}
+          onClick={onLogin}
         />
       </GenericBoxComponent>
     </AuthContainer>

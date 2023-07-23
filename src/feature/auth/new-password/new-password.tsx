@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { object, string } from "yup";
 import { confirmPasswordReset } from "firebase/auth";
 import { useTheme } from "styled-components";
 import { ImSpinner2 } from "react-icons/im";
@@ -26,8 +27,8 @@ export function NewPasswordPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [password, setPassword] = useState({password: "", confirmPassword: ""});
+  const [passwordError, setPasswordError] = useState({password: "", confirmPassword: ""});
 
   const [showPwd, setShowPwd] = useState(false);
   const [showConPwd, setShowConPwd] = useState(false);
@@ -38,6 +39,20 @@ export function NewPasswordPage() {
 
   const theme: any = useTheme();  
 
+  let passwordSchema = object({
+    password: string().min(6).required("Password is required!"),
+    confirmPassword: string().required("Pls Confirm your password!"),
+  });
+
+  const handleInput = async (attribute: string, value: string) => {
+    setPassword(password => ({...password, ...{[attribute]: value}}));
+    setPasswordError(passwordError => ({...passwordError, ...{[attribute]: ""}}));
+    const [error, _] = await tryToCatch(passwordSchema.validateAt, attribute, {[attribute]: value});
+    if (error) {
+      setPasswordError(passwordError => ({...passwordError, ...{[error.path]: error.message}}));
+    };
+  };
+
   let oobCode: string | null = searchParams.get("oobCode");
   
   useEffect(() => {
@@ -46,17 +61,33 @@ export function NewPasswordPage() {
 
   const onUpdatePassword = async () => {
     setIsLoading(true);
-    const [error, _] = await tryToCatch(confirmPasswordReset, auth, oobCode, newPassword);
-    if (error) {
-      const errorCode = error.code;
-      const errorType = errorCode.split("/")[1]; 
-      setError(errorType === "invalid-action-code" ? "Invalid action" : "Something went wrong!");
-      setNewPassword("");
-      setConfirmNewPassword(""); 
-    } else {
-      setSuccess("Your new password has been saved!");
+    setPasswordError({password: "", confirmPassword: ""});
+    try {
+      await passwordSchema.validate(password, {abortEarly: false});
+      if (!(password.password === password.confirmPassword)) 
+        return setPasswordError({...passwordError, confirmPassword: "The two passwords didn't match!"});
+      const [error, _] = await tryToCatch(confirmPasswordReset, auth, oobCode, password);
+      if (error) {
+        const errorCode = error.code;
+        const errorType = errorCode.split("/")[1]; 
+        setError(errorType === "invalid-action-code" ? "Invalid action" : "Something went wrong!");
+        setPassword({password: "", confirmPassword: ""});
+      } else {
+        setSuccess("Your new password has been saved!");
+      };
+    } catch (err: any) {
+      const pathToMessage = err.inner.reduce((acc: any, error: any) => {
+        acc[error.path] = error.message;
+        return acc;
+      }, {});
+  
+      setPasswordError({
+        ...passwordError,
+        ...pathToMessage,
+      });
+    } finally {
+      setIsLoading(false);
     };
-    setIsLoading(false)
   };
 
   return (
@@ -90,7 +121,6 @@ export function NewPasswordPage() {
             ? <GenericBoxComponent 
                   height={48} 
                   width={300} 
-                  vCentred={false}
                   padding={18}
                   borderRadius={12} 
                   bgColor={theme.currentTheme.successBackgroundColor}
@@ -102,13 +132,11 @@ export function NewPasswordPage() {
               </GenericBoxComponent>
             : <></>
         }
-        <Spacer size="small" />
         {
           error.length
             ? <GenericBoxComponent 
                   height={48} 
                   width={300} 
-                  vCentred={false}
                   padding={18}
                   borderRadius={12} 
                   bgColor={theme.currentTheme.errorBackgroundColor}
@@ -119,37 +147,48 @@ export function NewPasswordPage() {
               </GenericBoxComponent>
             : <></>
         }
+        <Spacer size="small" />
         <InputComponent
           type={showPwd ? "text" : "password"}
-          value={newPassword}
+          value={password.password}
           placeholder="New Password"
-          setValue={setNewPassword}  
+          error={passwordError.password.length > 0}
+          setValue={(value: string) => handleInput("password", value)}  
           icon={
             showPwd 
               ? <BsEye size={20} onClick={() => setShowPwd(false)} /> 
               : <PiEyeClosedLight size={20} onClick={() => setShowPwd(true)}/>
           }        
         />
+        { passwordError.password.length
+            ? <ErrorText style={{color: "#f00"}}>{passwordError.password}</ErrorText>
+            : null
+        }
         <Spacer size="small" />
         <InputComponent
           type={showConPwd ? "text" : "password"}
-          value={confirmNewPassword}
+          value={password.confirmPassword}
           placeholder="Confirm Password"
-          setValue={setConfirmNewPassword}   
+          error={passwordError.confirmPassword.length > 0}
+          setValue={(value: string) => handleInput("confirmPassword", value)}  
           icon={
             showConPwd 
               ? <BsEye size={20} onClick={() => setShowConPwd(false)} /> 
               : <PiEyeClosedLight size={20} onClick={() => setShowConPwd(true)}/>
           }       
         />
+        { passwordError.confirmPassword.length
+            ? <ErrorText style={{color: "#f00"}}>{passwordError.confirmPassword}</ErrorText>
+            : null
+        }
         <Spacer size="medium" />
         <ButtonComponent 
           text="Change Password" 
           iconPosition="right"
           spin={true}
-          disabled={error.length > 0}
+          disabled={!password.password.length}
           icon={isLoding ? <ImSpinner2 size={20} /> : null} 
-          onClick={error.length ? () => null : onUpdatePassword}
+          onClick={onUpdatePassword}
         />
       </GenericBoxComponent>
     </AuthContainer>

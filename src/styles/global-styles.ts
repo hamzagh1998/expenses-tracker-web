@@ -106,6 +106,7 @@ export const ErrorText = styled.p`
   color: ${({theme}) => theme.currentTheme.errorText};
   max-width: 300px;
   margin: 0;
+  padding: 0;
 `;
 
 

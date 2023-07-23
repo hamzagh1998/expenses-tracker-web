@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { sendPasswordResetEmail } from "firebase/auth";
+import { object, string } from "yup";
 import { useTheme } from "styled-components";
 import { ImSpinner2 } from "react-icons/im";
 
@@ -14,14 +15,15 @@ import { BackComponent } from "../../../components/back/back.component";
 import { AuthContainer, AuthLogoContainer, AuthTypeText, ErrorText, SuccessText } from "../../../styles/global-styles";
 import { HintText } from "./styles";
 
-import logo from "../../../assets/logo.png";
-
 import { tryToCatch } from "../../../utils/try-to-catch";
+
+import logo from "../../../assets/logo.png";
 
 
 export function ResetPasswordPage() {
 
   const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
 
   const [isLoding, setIsLoading] = useState(false);
   const [success, setSuccess] = useState("");
@@ -29,20 +31,41 @@ export function ResetPasswordPage() {
 
   const theme: any = useTheme();  
 
+  let emailSchema = object({
+    email: string().email("Pls enter a valid email address!").required("Email is required!"),
+  });
+
+  const handleInput = async (value: string) => {
+    setEmail(value);
+    setEmailError("");
+    const [error, _] = await tryToCatch(emailSchema.validateAt, "email", {"email": value});
+    if (error) setEmailError(error.message);
+  };
+
   const onSendResetEmail = async () => {
     setIsLoading(true);
-    const [error, _] = await tryToCatch(sendPasswordResetEmail, auth, email);
-    if (error) {
-      const errorCode = error.code;
-      const errorType = errorCode.split("/")[1];      
-      const emailError = "Incorrect email. Please enter it again."
-      const passwordError = "Incorrect password. Please enter it again."      
-      setError(errorType === "invalid-email" ? emailError : passwordError);
-      setEmail("");
-    } else {
-      setSuccess("An email containing a reset link has been sent to your email address!  If you don't see the email in your inbox, please check your spam or junk folder.");
+    setEmailError("");
+    try {
+      await emailSchema.validate({"email": email}, { abortEarly: false })
+      const [error, _] = await tryToCatch(sendPasswordResetEmail, auth, email);
+      if (error) {
+        const errorCode = error.code;
+        const errorType = errorCode.split("/")[1];      
+        const emailError = "Incorrect email. Please enter it again."
+        const passwordError = "Incorrect password. Please enter it again."      
+        setError(errorType === "invalid-email" ? emailError : passwordError);
+        setEmail("");
+      } else {
+        setSuccess("An email containing a reset link has been sent to your email address!  If you don't see the email in your inbox, please check your spam or junk folder.");
+      };
+      
+    } catch (err: any) {
+      err.inner.reduce((acc: any, error: any) => {
+        setEmailError(error.message);
+      }, {});
+    } finally {
+      setIsLoading(false);
     };
-    setIsLoading(false);
   };
 
   return (
@@ -77,7 +100,6 @@ export function ResetPasswordPage() {
             ? <GenericBoxComponent 
                   height={48} 
                   width={300} 
-                  vCentred={false}
                   padding={18}
                   borderRadius={12} 
                   bgColor={theme.currentTheme.successBackgroundColor}
@@ -93,7 +115,6 @@ export function ResetPasswordPage() {
             ? <GenericBoxComponent 
                   height={48} 
                   width={300} 
-                  vCentred={false}
                   padding={18}
                   borderRadius={12} 
                   bgColor={theme.currentTheme.errorBackgroundColor}
@@ -109,16 +130,21 @@ export function ResetPasswordPage() {
           type="email"
           value={email}
           placeholder="Email"
-          setValue={setEmail}        
+          error={emailError.length > 0}
+          setValue={handleInput}        
         />
+        { emailError.length
+            ? <ErrorText style={{color: "#f00"}}>{emailError}</ErrorText>
+            : null
+        }
         <Spacer size="large" />
         <ButtonComponent 
           text="Send reset link" 
           iconPosition="right"
           spin={true}
-          disabled={error.length > 0}
+          disabled={!email.length}
           icon={isLoding ? <ImSpinner2 size={20} /> : null} 
-          onClick={error.length ? () => null : onSendResetEmail}
+          onClick={onSendResetEmail}
         />
       </GenericBoxComponent>
     </AuthContainer>

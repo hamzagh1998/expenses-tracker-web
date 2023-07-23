@@ -23,12 +23,12 @@ const Container = styled.div<Props>`
   box-shadow: ${({ shadow }) => shadow};
 `;
 
-const Wrapper = styled.div<Pick<Props, "hCentred" | "vCentred">>`
+const Wrapper = styled.div<Pick<Props, "hCentred" | "vCentred" | "height" | "width">>`
   display: flex;
   justify-content: ${({ hCentred }) => (hCentred ? "center" : "left")};
   align-items: ${({ vCentred }) => (vCentred ? "center" : "top")};
-  width: 100%;
-  height: 100%;
+  min-width: ${({ width }) => width}px;
+  min-height: ${({ height }) => height}px;
   margin: 0;
   padding: 0;
 `;
@@ -44,6 +44,7 @@ export function GenericBoxComponent({
   shadow="none",
   children,
 }: Props) {
+  
   return (
     <Container
       height={height}
@@ -53,7 +54,12 @@ export function GenericBoxComponent({
       borderRadius={borderRadius}
       shadow={shadow}
     >
-      <Wrapper hCentred={hCentred} vCentred={vCentred}>
+      <Wrapper 
+        hCentred={hCentred} 
+        vCentred={vCentred}
+        height={height}
+        width={width}
+      >
         <div>
           {children}
         </div>

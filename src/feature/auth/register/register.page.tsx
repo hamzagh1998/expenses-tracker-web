@@ -17,9 +17,9 @@ import { ImSpinner2 } from "react-icons/im";
 import { AuthContainer, AuthLogoContainer, AuthQuestionText, AuthTypeText, ErrorText, FlexContainer, GoogleButton, LinkText, OrLine } from "../../../styles/global-styles";
 import { InputsWrapper, PolicyText } from "./styles";
 
-import logo from "../../../assets/logo.png";
-
 import { tryToCatch } from "../../../utils/try-to-catch";
+
+import logo from "../../../assets/logo.png";
 
 
 export function RegisterPage() {
@@ -43,8 +43,8 @@ export function RegisterPage() {
 
   const handleInput = async (attribute: string, value: string) => {
     setInputsInfo(inputsInfo => ({...inputsInfo, ...{[attribute]: value}}));
-    const [error, _] = await tryToCatch(registerSchema.validateAt, attribute, {[attribute]: value});
     setInputsError(inputsError => ({...inputsError, ...{[attribute]: ""}}));
+    const [error, _] = await tryToCatch(registerSchema.validateAt, attribute, {[attribute]: value});
     if (error) {
       setInputsError(inputsError => ({...inputsError, ...{[error.path]: error.message}}));
     };
@@ -76,7 +76,7 @@ export function RegisterPage() {
     } else {
       await sendEmailVerification(userCredential.user);
     }
-  } catch (err: any) {
+  } catch (err: any) {    
     const pathToMessage = err.inner.reduce((acc: any, error: any) => {
       acc[error.path] = error.message;
       return acc;
@@ -86,8 +86,9 @@ export function RegisterPage() {
       ...inputsError,
       ...pathToMessage,
     });
-  }
-  setIsLoading(false);
+  } finally {
+    setIsLoading(false);
+  };
 };
 
 
