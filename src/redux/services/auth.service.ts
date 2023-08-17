@@ -1,8 +1,10 @@
-import { api } from "./api";
+import { createApi } from "@reduxjs/toolkit/query/react";
 
+import { baseQuery } from "./api";
 
-// Create the authApi object with explicit types
-const authApi: any = api.injectEndpoints({
+// Define your mutation endpoints here
+export const authApi = createApi({
+  baseQuery: baseQuery,
   endpoints: (build) => ({
     login: build.mutation({
       query: (payload) => ({
@@ -20,11 +22,7 @@ const authApi: any = api.injectEndpoints({
       }),
     }),
   }),
-
-  overrideExisting: false,
 });
 
-// Now you can access the mutation hooks
 export const { useLoginMutation, useRegisterMutation } = authApi;
 
-export default authApi;

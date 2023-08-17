@@ -38,8 +38,13 @@ export function ResetPasswordPage() {
   const handleInput = async (value: string) => {
     setEmail(value);
     setEmailError("");
-    const [error, _] = await tryToCatch(emailSchema.validateAt, "email", {"email": value});
-    if (error) setEmailError(error.message);
+    try {
+      await emailSchema.validateAt("email", {"email": value})
+    } catch (err: any) {
+      err.inner.reduce((acc: any, error: any) => {
+        setEmailError(error.message);
+      }, {});
+    }
   };
 
   const onSendResetEmail = async () => {
@@ -51,9 +56,9 @@ export function ResetPasswordPage() {
       if (error) {
         const errorCode = error.code;
         const errorType = errorCode.split("/")[1];      
-        const emailError = "Incorrect email. Please enter it again."
-        const passwordError = "Incorrect password. Please enter it again."      
-        setError(errorType === "invalid-email" ? emailError : passwordError);
+        const emailError = "Incorrect email. Please enter it again!"
+        const userNotFoundError = "No user exists with this email!"              
+        setError(errorType === "invalid-email" ? emailError : userNotFoundError);
         setEmail("");
       } else {
         setSuccess("An email containing a reset link has been sent to your email address!  If you don't see the email in your inbox, please check your spam or junk folder.");

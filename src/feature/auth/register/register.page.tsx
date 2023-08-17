@@ -22,8 +22,6 @@ import { tryToCatch } from "../../../utils/try-to-catch";
 
 import logo from "../../../assets/logo.png";
 
-import authApi from "../../../redux/services/auth.service";
-
 
 
 export function RegisterPage() {
@@ -40,7 +38,6 @@ export function RegisterPage() {
 
   // Create the useRegisterMutation hook  
   const [registerMutation, { isLoading }] = useRegisterMutation();
-  // console.log(useRegisterMutation, authApi);
   
   let registerSchema = object({
     firstName: string().required("First name is required!"),
@@ -84,7 +81,7 @@ export function RegisterPage() {
     } else {
       const { email, password, firstName, lastName } = inputsInfo; // Extract required fields
       const payload = { email, password, firstName, lastName }; // Create the payload for registration
-      const res = await registerMutation.mutateAsync(payload); // Pass the payload to the mutation
+      const res = await registerMutation(payload); // Pass the payload to the mutation
       await sendEmailVerification(userCredential.user);
     }
   } catch (err: any) {    
