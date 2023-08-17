@@ -4,6 +4,7 @@ import { useTheme } from "styled-components";
 import { object, string } from "yup";
 
 import { auth, googleProvider } from "../../../firebase";
+import { useRegisterMutation } from "../../../redux/services/auth.service";
 
 import { GenericBoxComponent } from "../../../components/genaric-box/generic-box.component";
 import { Spacer } from "../../../components/spacer/spacer";
@@ -21,6 +22,9 @@ import { tryToCatch } from "../../../utils/try-to-catch";
 
 import logo from "../../../assets/logo.png";
 
+import authApi from "../../../redux/services/auth.service";
+
+
 
 export function RegisterPage() {
 
@@ -34,6 +38,10 @@ export function RegisterPage() {
 
   const theme: any = useTheme();  
 
+  // Create the useRegisterMutation hook  
+  const [registerMutation, { isLoading }] = useRegisterMutation();
+  // console.log(useRegisterMutation, authApi);
+  
   let registerSchema = object({
     firstName: string().required("First name is required!"),
     lastName: string().required("Last name is required!"),
@@ -74,6 +82,9 @@ export function RegisterPage() {
             : "Something went wrong please check your network then try again!"
         );
     } else {
+      const { email, password, firstName, lastName } = inputsInfo; // Extract required fields
+      const payload = { email, password, firstName, lastName }; // Create the payload for registration
+      const res = await registerMutation.mutateAsync(payload); // Pass the payload to the mutation
       await sendEmailVerification(userCredential.user);
     }
   } catch (err: any) {    
