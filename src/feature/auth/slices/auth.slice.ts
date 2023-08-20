@@ -22,7 +22,7 @@ export const authSlice = createSlice({
       state.userData = userData;
       state.fbToken = fbToken;
       state.token = token;
-    },
+    }
   }
 });
 

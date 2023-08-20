@@ -1,7 +1,10 @@
 import React, { useState } from "react";
-import { createUserWithEmailAndPassword, sendEmailVerification, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification, signInWithPopup, GoogleAuthProvider, deleteUser } from "firebase/auth";
+import { useDispatch } from "react-redux";
+import { setUserData } from "../slices/auth.slice";
 import { useTheme } from "styled-components";
 import { object, string } from "yup";
+import jwt_decode from "jwt-decode";
 
 import { auth, googleProvider } from "../../../firebase";
 import { useRegisterMutation } from "../../../redux/services/auth.service";
@@ -23,8 +26,14 @@ import { tryToCatch } from "../../../utils/try-to-catch";
 import logo from "../../../assets/logo.png";
 
 
-
 export function RegisterPage() {
+  
+  const dispatch = useDispatch();
+
+  const theme: any = useTheme();  
+
+  // Create the useRegisterMutation hook  
+  const [registerMutation, { isLoading }] = useRegisterMutation();
 
   const [inputsInfo, setInputsInfo] = useState({firstName: "", lastName: "", email: "", password: ""});
   const [inputsError, setInputsError] = useState({firstName: "", lastName: "", email: "", password: ""});
@@ -33,12 +42,6 @@ export function RegisterPage() {
   const [isLoding, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-
-  const theme: any = useTheme();  
-
-  // Create the useRegisterMutation hook  
-  const [registerMutation, { isLoading }] = useRegisterMutation();
-  
   let registerSchema = object({
     firstName: string().required("First name is required!"),
     lastName: string().required("Last name is required!"),
@@ -79,21 +82,29 @@ export function RegisterPage() {
             : "Something went wrong please check your network then try again!"
         );
     } else {
+      const userFbToken = userCredential?.user?.accessToken; // firbase access token
       const { email, password, firstName, lastName } = inputsInfo; // Extract required fields
-      const payload = { email, password, firstName, lastName }; // Create the payload for registration
-      const res = await registerMutation(payload); // Pass the payload to the mutation
-      await sendEmailVerification(userCredential.user);
+      const payload = { firstName, lastName, email, password, userFbToken }; // Create the payload for registration
+      const [error, res] = await tryToCatch(registerMutation, payload); // Pass the payload to the mutation
+      if (error) {
+        if (userCredential?.user) await deleteUser(auth.currentUser!);
+      } else {
+        await sendEmailVerification(userCredential.user);
+        const decoded = jwt_decode(res.detail) || null;
+        dispatch(setUserData({ token: res.token, fbToken: userFbToken, userData: decoded }));
+      };
     }
-  } catch (err: any) {    
-    const pathToMessage = err.inner.reduce((acc: any, error: any) => {
-      acc[error.path] = error.message;
-      return acc;
-    }, {});
-
-    setInputsError({
-      ...inputsError,
-      ...pathToMessage,
-    });
+  } catch (err: any) {
+    if (err.inner) {
+      const pathToMessage = err.inner.reduce((acc: any, error: any) => {
+        acc[error.path] = error.message;
+        return acc;
+      }, {});
+      setInputsError({
+        ...inputsError,
+        ...pathToMessage,
+      });
+    };
   } finally {
     setIsLoading(false);
   };
@@ -147,7 +158,7 @@ export function RegisterPage() {
             ? <GenericBoxComponent 
                   height={48} 
                   width={300} 
-                  vCentred={false}
+                  vCentred={true}
                   padding={18}
                   borderRadius={12} 
                   bgColor={theme.currentTheme.errorBackgroundColor}
