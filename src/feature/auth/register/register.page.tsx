@@ -7,7 +7,7 @@ import { object, string } from "yup";
 import jwt_decode from "jwt-decode";
 
 import { auth, googleProvider } from "../../../firebase";
-import { useRegisterMutation } from "../../../redux/services/auth.service";
+import { RegisterI, useRegisterMutation } from "../../../redux/services/auth.service";
 
 import { GenericBoxComponent } from "../../../components/genaric-box/generic-box.component";
 import { Spacer } from "../../../components/spacer/spacer";
@@ -84,13 +84,14 @@ export function RegisterPage() {
     } else {
       const userFbToken = userCredential?.user?.accessToken; // firbase access token
       const { email, password, firstName, lastName } = inputsInfo; // Extract required fields
-      const payload = { firstName, lastName, email, password, userFbToken }; // Create the payload for registration
-      const [error, res] = await tryToCatch(registerMutation, payload); // Pass the payload to the mutation
+      const payload: RegisterI = { firstName, lastName, email, password, userFbToken, provider: "email" }; // Create the payload for registration
+      const [error, res] = await tryToCatch(registerMutation, payload); // Pass the payload to the mutation      
       if (error) {
         if (userCredential?.user) await deleteUser(auth.currentUser!);
       } else {
         await sendEmailVerification(userCredential.user);
-        const decoded = jwt_decode(res.detail) || null;
+        const decoded = jwt_decode(res.data.detail) || null;
+        console.log("decoded:", decoded);
         dispatch(setUserData({ token: res.token, fbToken: userFbToken, userData: decoded }));
       };
     }
@@ -112,7 +113,7 @@ export function RegisterPage() {
 
 
   const onGoogleSignup = async () => {
-    const [error, data] = await tryToCatch(signInWithPopup, auth, googleProvider);
+    const [error, userCredential] = await tryToCatch(signInWithPopup, auth, googleProvider);
     if (error) {
       const errorCode = error.code;
       const errorMessage = error.message;
@@ -120,12 +121,23 @@ export function RegisterPage() {
       const email = error.customData.email;
       // The AuthCredential type that was used.
       const credential = GoogleAuthProvider.credentialFromError(error);
+      setError("Ooops, Something went wrong!");
+    } else {
+      // The signed-in user info.
+      const user = userCredential.user;
+      const userFbToken = user?.accessToken; // firbase access token
+      const { email, displayName, photoURL } = user;
+      const [firstName, lastName] = displayName.split(" ");
+      const payload: RegisterI = { firstName, lastName, email, photoURL, userFbToken, provider: "google" }; // Create the payload for registration
+      const [error, res] = await tryToCatch(registerMutation, payload); // Pass the payload to the mutation      
+      if (error) {
+        if (user) await deleteUser(auth.currentUser!);
+      } else {
+        await sendEmailVerification(user);
+        const decoded = jwt_decode(res.data.detail) || null;   
+        dispatch(setUserData({ token: res.detail, fbToken: userFbToken, userData: decoded }));
+      };
     };
-    // This gives you a Google Access Token. You can use it to access the Google API.
-    const credential = GoogleAuthProvider.credentialFromResult(data);
-    const token = credential!.accessToken;
-    // The signed-in user info.
-    const user = data.user;
   };  
 
   return (

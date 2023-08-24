@@ -1,6 +1,4 @@
-import { fetchBaseQuery, retry } from "@reduxjs/toolkit/query/react";
-import { BaseQueryApi } from "@reduxjs/toolkit/query/react"; // Make sure to import BaseQueryApi
-import { createApi } from "@reduxjs/toolkit/dist/query";
+import { createApi, fetchBaseQuery, retry, BaseQueryApi } from "@reduxjs/toolkit/query/react";
 
 import { RootState } from "../store";
 
@@ -22,7 +20,10 @@ const baseQueryWithRetry = retry(baseQuery, { maxRetries: 5 });
 
 // Create the API
 export const api = createApi({
+  reducerPath: "api",
   baseQuery: baseQueryWithRetry,
   endpoints: build => ({}), // Add your endpoints here
 });
+
+
 

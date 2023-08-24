@@ -1,23 +1,25 @@
-import { createApi } from "@reduxjs/toolkit/query/react";
+import { api } from "./api";
 
-import { baseQuery } from "./api";
+type Provider = "email" | "google";
 
-interface LoginI {
+export interface LoginI {
   email: string;
   password: string;
   userFbToken: string;
+  provider: Provider;
 };
 
-interface RegisterI {
+export interface RegisterI {
   firstName: string;
   lastName: string;
   email: string;
-  password: string;
+  password?: string;
+  photoURL?: string;
   userFbToken: string;
+  provider: Provider;
 };
 
-export const authApi = createApi({
-  baseQuery: baseQuery,
+export const authApi = api.injectEndpoints({
   endpoints: (build) => ({
     login: build.mutation({
       query: (payload: LoginI) => ({
