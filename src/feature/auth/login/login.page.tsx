@@ -1,13 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { useDispatch } from "react-redux";
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, deleteUser } from "firebase/auth";
 import { object, string } from "yup";
 import { useTheme } from "styled-components";
 import { BsEye } from "react-icons/bs";
 import { PiEyeClosedLight } from "react-icons/pi";
 import { FcGoogle } from "react-icons/fc";
 import { ImSpinner2 } from "react-icons/im";
+import jwt_decode from "jwt-decode";
+
+import { setUserData } from "../slices/auth.slice";
 
 import { auth, googleProvider } from "../../../firebase";
+import { LoginI, RegisterI, useLoginMutation } from "../../../redux/services/auth.service";
 
 import { AuthContainer, AuthLogoContainer, AuthQuestionText, AuthTypeText, ErrorText, FlexContainer, GoogleButton, LinkText, OrLine } from "../../../styles/global-styles";
 import { Spacer } from "../../../components/spacer/spacer";
@@ -22,14 +27,19 @@ import { tryToCatch } from "../../../utils/try-to-catch";
 
 export function LoginPage() {
 
+  const dispatch = useDispatch();
+
+  const theme: any = useTheme();  
+
+  // Create the useLoginMutation hook  
+  const [loginMutation] = useLoginMutation();
+
   const [inputsInfo, setInputsInfo] = useState({email: "", password: ""});
   const [inputsError, setInputsError] = useState({email: "", password: ""});
   const [showPwd, setShowPwd] = useState(false);
 
   const [isLoding, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-
-  const theme: any = useTheme();  
 
   let loginSchema = object({
     email: string().email("Pls enter a valid email address!").required("Email is required!"),
@@ -54,13 +64,24 @@ export function LoginPage() {
     // Check if there are validation errors before proceeding
     try {
       await loginSchema.validate(inputsInfo, { abortEarly: false });
-      const [error, _] = await tryToCatch(signInWithEmailAndPassword, auth, inputsInfo.email, inputsInfo.password);
+      const [error, userCredential] = await tryToCatch(signInWithEmailAndPassword, auth, inputsInfo.email, inputsInfo.password);
       if (error) {
         const errorCode = error.code;
         const errorType = errorCode.split("/")[1];
         const emailError = "Incorrect email. Please enter it again."
         const passwordError = "Incorrect password. Please enter it again."      
         setError(errorType === "invalid-email" ? emailError : passwordError);
+      } else {
+        const userFbToken = userCredential?.user?.accessToken; // firbase access token
+        const { email, password } = inputsInfo; // Extract required fields
+        const payload: LoginI = { email, password, userFbToken, provider: "email" }; // Create the payload for registration
+        const [error, res] = await tryToCatch(loginMutation, payload); // Pass the payload to the mutation      
+        if (error) {
+          if (userCredential?.user) await deleteUser(auth.currentUser!);
+        } else {
+          const decoded = jwt_decode(res.data.detail) || null;
+          dispatch(setUserData({ token: res.token, fbToken: userFbToken, userData: decoded }));
+        };
       };
     } catch(err: any) {
       const pathToMessage = err.inner.reduce((acc: any, error: any) => {
@@ -79,7 +100,7 @@ export function LoginPage() {
   
 
   const onGoogleSignIn = async () => {
-    const [error, data] = await tryToCatch(signInWithPopup, auth, googleProvider);
+    const [error, userCredential] = await tryToCatch(signInWithPopup, auth, googleProvider);
     if (error) {
       const errorCode = error.code;
       const errorMessage = error.message;
@@ -87,13 +108,23 @@ export function LoginPage() {
       const email = error.customData.email;
       // The AuthCredential type that was used.
       const credential = GoogleAuthProvider.credentialFromError(error);
+      setError("Ooops, Something went wrong!");
+    } else {
+      // The signed-in user info.
+      const user = userCredential.user;
+      const userFbToken = user?.accessToken; // firbase access token
+      const { email, displayName, photoURL } = user;
+      const [firstName, lastName] = displayName.split(" ");
+      const payload: RegisterI = { firstName, lastName, email, photoURL, userFbToken, provider: "google" }; // Create the payload for registration
+      const [error, res] = await tryToCatch(loginMutation, payload); // Pass the payload to the mutation      
+      if (error) {
+        if (user) await deleteUser(auth.currentUser!);
+      } else {
+        const decoded = jwt_decode(res.data.detail) || null;   
+        dispatch(setUserData({ token: res.detail, fbToken: userFbToken, userData: decoded }));
+      };
     };
-    // This gives you a Google Access Token. You can use it to access the Google API.
-    const credential = GoogleAuthProvider.credentialFromResult(data);
-    const token = credential!.accessToken;
-    // The signed-in user info.
-    const user = data.user;
-  };
+  }; 
 
   return (
     <AuthContainer>

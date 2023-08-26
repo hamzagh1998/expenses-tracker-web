@@ -4,7 +4,7 @@ type Provider = "email" | "google";
 
 export interface LoginI {
   email: string;
-  password: string;
+  password?: string;
   userFbToken: string;
   provider: Provider;
 };

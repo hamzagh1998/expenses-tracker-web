@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { createUserWithEmailAndPassword, sendEmailVerification, signInWithPopup, GoogleAuthProvider, deleteUser } from "firebase/auth";
 import { useDispatch } from "react-redux";
-import { setUserData } from "../slices/auth.slice";
 import { useTheme } from "styled-components";
 import { object, string } from "yup";
 import jwt_decode from "jwt-decode";
+
+import { setUserData } from "../slices/auth.slice";
 
 import { auth, googleProvider } from "../../../firebase";
 import { RegisterI, useRegisterMutation } from "../../../redux/services/auth.service";
@@ -33,7 +34,7 @@ export function RegisterPage() {
   const theme: any = useTheme();  
 
   // Create the useRegisterMutation hook  
-  const [registerMutation, { isLoading }] = useRegisterMutation();
+  const [ registerMutation] = useRegisterMutation();
 
   const [inputsInfo, setInputsInfo] = useState({firstName: "", lastName: "", email: "", password: ""});
   const [inputsError, setInputsError] = useState({firstName: "", lastName: "", email: "", password: ""});
@@ -59,57 +60,56 @@ export function RegisterPage() {
   };
 
   const onRegister = async () => {    
-  setIsLoading(true);
-  setError("");
-  setInputsError({ firstName: "", lastName: "", email: "", password: "" });
-  try {
-    await registerSchema.validate(inputsInfo, { abortEarly: false });
-    const { email, password } = inputsInfo;
-    const [error, userCredential] = await tryToCatch(
-      createUserWithEmailAndPassword,
-      auth,
-      email,
-      password
-    );
-    if (error) {
-      const errorCode = error.code;
-      const errorType = errorCode.split("/")[1];
-      errorType === "invalid-email"
-        ? setInputsError({...inputsError, email: "Pls enter a valid email address!"})
-        : setError(
-          errorType === "email-already-in-use"
-            ? "Email address already exists"
-            : "Something went wrong please check your network then try again!"
-        );
-    } else {
-      const userFbToken = userCredential?.user?.accessToken; // firbase access token
-      const { email, password, firstName, lastName } = inputsInfo; // Extract required fields
-      const payload: RegisterI = { firstName, lastName, email, password, userFbToken, provider: "email" }; // Create the payload for registration
-      const [error, res] = await tryToCatch(registerMutation, payload); // Pass the payload to the mutation      
+    setIsLoading(true);
+    setError("");
+    setInputsError({ firstName: "", lastName: "", email: "", password: "" });
+    try {
+      await registerSchema.validate(inputsInfo, { abortEarly: false });
+      const { email, password } = inputsInfo;
+      const [error, userCredential] = await tryToCatch(
+        createUserWithEmailAndPassword,
+        auth,
+        email,
+        password
+      );
       if (error) {
-        if (userCredential?.user) await deleteUser(auth.currentUser!);
+        const errorCode = error.code;
+        const errorType = errorCode.split("/")[1];
+        errorType === "invalid-email"
+          ? setInputsError({...inputsError, email: "Pls enter a valid email address!"})
+          : setError(
+            errorType === "email-already-in-use"
+              ? "Email address already exists"
+              : "Something went wrong please check your network then try again!"
+          );
       } else {
-        await sendEmailVerification(userCredential.user);
-        const decoded = jwt_decode(res.data.detail) || null;
-        console.log("decoded:", decoded);
-        dispatch(setUserData({ token: res.token, fbToken: userFbToken, userData: decoded }));
+        const userFbToken = userCredential?.user?.accessToken; // firbase access token
+        const { email, password, firstName, lastName } = inputsInfo; // Extract required fields
+        const payload: RegisterI = { firstName, lastName, email, password, userFbToken, provider: "email" }; // Create the payload for registration
+        const [error, res] = await tryToCatch(registerMutation, payload); // Pass the payload to the mutation      
+        if (error) {
+          if (userCredential?.user) await deleteUser(auth.currentUser!);
+        } else {
+          await sendEmailVerification(userCredential.user);
+          const decoded = jwt_decode(res.data.detail) || null;
+          dispatch(setUserData({ token: res.token, fbToken: userFbToken, userData: decoded }));
+        };
+      }
+    } catch (err: any) {
+      if (err.inner) {
+        const pathToMessage = err.inner.reduce((acc: any, error: any) => {
+          acc[error.path] = error.message;
+          return acc;
+        }, {});
+        setInputsError({
+          ...inputsError,
+          ...pathToMessage,
+        });
       };
-    }
-  } catch (err: any) {
-    if (err.inner) {
-      const pathToMessage = err.inner.reduce((acc: any, error: any) => {
-        acc[error.path] = error.message;
-        return acc;
-      }, {});
-      setInputsError({
-        ...inputsError,
-        ...pathToMessage,
-      });
+    } finally {
+      setIsLoading(false);
     };
-  } finally {
-    setIsLoading(false);
   };
-};
 
 
   const onGoogleSignup = async () => {
@@ -133,7 +133,6 @@ export function RegisterPage() {
       if (error) {
         if (user) await deleteUser(auth.currentUser!);
       } else {
-        await sendEmailVerification(user);
         const decoded = jwt_decode(res.data.detail) || null;   
         dispatch(setUserData({ token: res.detail, fbToken: userFbToken, userData: decoded }));
       };
@@ -183,7 +182,7 @@ export function RegisterPage() {
         }
         <Spacer size="medium" />
         <InputsWrapper>
-          <div>
+          <>
             <InputComponent
               type="text"
               width={150}
@@ -196,8 +195,8 @@ export function RegisterPage() {
               ? <ErrorText style={{color: "#f00"}}>{inputsError.firstName}</ErrorText>
               : null
             }
-          </div>
-          <div>
+          </>
+          <>
             <InputComponent
               type="text"
               width={150}
@@ -210,7 +209,7 @@ export function RegisterPage() {
                 ? <ErrorText style={{color: "#f00"}}>{inputsError.lastName}</ErrorText>
                 : null
             }
-          </div>
+          </>
         </InputsWrapper>
         <Spacer size="medium" />
         <InputComponent
