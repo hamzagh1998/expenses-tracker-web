@@ -19,7 +19,7 @@ import { FcGoogle } from "react-icons/fc";
 import { ButtonComponent } from "../../../components/button/button.component";
 import { ImSpinner2 } from "react-icons/im";
 
-import { AuthContainer, AuthLogoContainer, AuthQuestionText, AuthTypeText, ErrorText, FlexContainer, GoogleButton, LinkText, OrLine } from "../../../styles/global-styles";
+import { AuthContainer, AuthLogoContainer, AuthQuestionText, AuthTypeText, AuthTypeTextConatiner, ContentContainer, ErrorText, FlexContainer, GoogleButton, LinkText, OrLine } from "../../../styles/global-styles";
 import { InputsWrapper, PolicyText } from "./styles";
 
 import { tryToCatch } from "../../../utils/try-to-catch";
@@ -147,122 +147,126 @@ export function RegisterPage() {
       </AuthLogoContainer>
       <Spacer size="medium" />
       <GenericBoxComponent 
-        height={542} 
-        width={410} 
+        height={572} 
+        width={380} 
         vCentred={false}
         padding={18}
         borderRadius={12} 
         bgColor={theme.currentTheme.backgroundColor}
         shadow="2px 2px 4px rgba(0, 0, 0, 0.2)"
       >
-        <Spacer size="large" />
-        <AuthTypeText>
-          Sign up
-        </AuthTypeText>
-        <Spacer size="large" />
-        <AuthQuestionText>
-          Already have an account? <LinkText href="/auth/login">Sign in</LinkText> 
-        </AuthQuestionText>
-        <Spacer size="large" />
-        {
-          error.length
-            ? <GenericBoxComponent 
-                  height={48} 
-                  width={300} 
-                  vCentred={true}
-                  padding={18}
-                  borderRadius={12} 
-                  bgColor={theme.currentTheme.errorBackgroundColor}
-              >
-                <ErrorText>
-                  {error}
-                </ErrorText>
-              </GenericBoxComponent>
-            : <></>
-        }
-        <Spacer size="medium" />
-        <InputsWrapper>
-          <>
-            <InputComponent
-              type="text"
-              width={150}
-              value={inputsInfo.firstName}
-              placeholder="First name"
-              error={inputsError.firstName.length > 0}
-              setValue={(value: string) => handleInput("firstName", value)}    
-            />
-            { inputsError.firstName 
-              ? <ErrorText style={{color: "#f00"}}>{inputsError.firstName}</ErrorText>
-              : null
-            }
-          </>
-          <>
-            <InputComponent
-              type="text"
-              width={150}
-              value={inputsInfo.lastName}
-              placeholder="Last name"
-              error={inputsError.lastName.length > 0}
-              setValue={(value: string) => handleInput("lastName", value)}        
-            />
-            { inputsError.lastName 
-                ? <ErrorText style={{color: "#f00"}}>{inputsError.lastName}</ErrorText>
+        <ContentContainer>
+          <Spacer size="large" />
+          <AuthTypeTextConatiner>
+            <AuthTypeText>
+              Sign up
+            </AuthTypeText>
+            <Spacer size="large" />
+            <AuthQuestionText>
+              Already have an account? <LinkText href="/auth/login">Sign in</LinkText> 
+            </AuthQuestionText>
+          </AuthTypeTextConatiner>
+          <Spacer />
+          {
+            error.length
+              ? <GenericBoxComponent 
+                    height={48} 
+                    width={300} 
+                    vCentred={true}
+                    padding={18}
+                    borderRadius={12} 
+                    bgColor={theme.currentTheme.errorBackgroundColor}
+                >
+                  <ErrorText>
+                    {error}
+                  </ErrorText>
+                </GenericBoxComponent>
+              : <></>
+          }
+          <Spacer size="medium" />
+          <InputsWrapper>
+            <>
+              <InputComponent
+                type="text"
+                width={150}
+                value={inputsInfo.firstName}
+                placeholder="First name"
+                error={inputsError.firstName.length > 0}
+                setValue={(value: string) => handleInput("firstName", value)}    
+              />
+              { inputsError.firstName 
+                ? <ErrorText style={{color: "#f00"}}>{inputsError.firstName}</ErrorText>
                 : null
-            }
-          </>
-        </InputsWrapper>
-        <Spacer size="medium" />
-        <InputComponent
-          type="email"
-          value={inputsInfo.email}
-          placeholder="Email"
-          error={inputsError.email.length > 0}
-          setValue={(value: string) => handleInput("email", value)}        
-        />
-        { inputsError.email 
-            ? <ErrorText style={{color: "#f00"}}>{inputsError.email}</ErrorText>
-            : null
-        }
-        <Spacer size="medium" />
-        <InputComponent
-          type={showPwd ? "text" : "password"}
-          value={inputsInfo.password}
-          placeholder="Password"
-          error={inputsError.password.length > 0}
-          setValue={(value: string) => handleInput("password", value)}  
-          icon={
-            showPwd 
-              ? <BsEye size={20} onClick={() => setShowPwd(false)} /> 
-              : <PiEyeClosedLight size={20} onClick={() => setShowPwd(true)}/>
-          }      
-        />
-        { inputsError.password 
-            ? <ErrorText style={{color: "#f00"}}>{inputsError.password}</ErrorText>
-            : null
-        }
-        <Spacer size="large" />
-        <FlexContainer>
-          <OrLine />
-            Or
-          <OrLine />
-        </FlexContainer>
-        <Spacer size="large" />
-        <GoogleButton onClick={onGoogleSignup}>
-          <FcGoogle size={26} />
-          Sign up with Google
-        </GoogleButton>
-        <Spacer size="large" />
-        <ButtonComponent 
-          text="Sign up" 
-          iconPosition="right"
-          spin={true}
-          icon={isLoding ? <ImSpinner2 size={20} /> : null} 
-          onClick={onRegister}
-        />
-        <Spacer />
-        <PolicyText>
-          By continuing, you agree to Expenses Tracker <LinkText>Terms of Service</LinkText> and <LinkText>Privacy Policy</LinkText>.
-        </PolicyText>
+              }
+            </>
+            <>
+              <InputComponent
+                type="text"
+                width={150}
+                value={inputsInfo.lastName}
+                placeholder="Last name"
+                error={inputsError.lastName.length > 0}
+                setValue={(value: string) => handleInput("lastName", value)}        
+              />
+              { inputsError.lastName 
+                  ? <ErrorText style={{color: "#f00"}}>{inputsError.lastName}</ErrorText>
+                  : null
+              }
+            </>
+          </InputsWrapper>
+          <Spacer size="medium" />
+          <InputComponent
+            type="email"
+            value={inputsInfo.email}
+            placeholder="Email"
+            error={inputsError.email.length > 0}
+            setValue={(value: string) => handleInput("email", value)}        
+          />
+          { inputsError.email 
+              ? <ErrorText style={{color: "#f00"}}>{inputsError.email}</ErrorText>
+              : null
+          }
+          <Spacer size="medium" />
+          <InputComponent
+            type={showPwd ? "text" : "password"}
+            value={inputsInfo.password}
+            placeholder="Password"
+            error={inputsError.password.length > 0}
+            setValue={(value: string) => handleInput("password", value)}  
+            icon={
+              showPwd 
+                ? <BsEye size={20} onClick={() => setShowPwd(false)} /> 
+                : <PiEyeClosedLight size={20} onClick={() => setShowPwd(true)}/>
+            }      
+          />
+          { inputsError.password 
+              ? <ErrorText style={{color: "#f00"}}>{inputsError.password}</ErrorText>
+              : null
+          }
+          <Spacer size="large" />
+          <FlexContainer>
+            <OrLine />
+              Or
+            <OrLine />
+          </FlexContainer>
+          <Spacer size="large" />
+          <GoogleButton onClick={onGoogleSignup}>
+            <FcGoogle size={26} />
+            Sign up with Google
+          </GoogleButton>
+          <Spacer size="large" />
+          <ButtonComponent 
+            text="Sign up" 
+            iconPosition="right"
+            spin={true}
+            icon={isLoding ? <ImSpinner2 size={20} /> : null} 
+            onClick={onRegister}
+          />
+          <Spacer />
+          <PolicyText>
+            By continuing, you agree to Expenses Tracker <LinkText>Terms of Service</LinkText> and <LinkText>Privacy Policy</LinkText>.
+          </PolicyText>
+        </ContentContainer>
       </GenericBoxComponent>
     </AuthContainer>
   );

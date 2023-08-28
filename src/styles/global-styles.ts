@@ -32,6 +32,18 @@ export const AuthLogoContainer = styled.div`
   font-weight: bold;
 `;
 
+export const ContentContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+`;
+
+export const AuthTypeTextConatiner = styled.div`
+  width: 100%;
+  padding-left: 30px;
+  margin: 0;
+`;
 
 export const AuthTypeText = styled.p`
   font-family: MochiyRegular;
@@ -70,7 +82,7 @@ export const FlexContainer = styled.div`
   gap: 2.5px;
   align-items: center;
   font-size: 12px;
-  width: 100%;
+  width: 354px;
   height: fit-content;
 `;
 
@@ -88,7 +100,7 @@ export const GoogleButton = styled.div`
   justify-content: center;
   align-items: center;
   gap: 24px;
-  width: 100%;
+  width: 354px;
   height: 46px;
   border-radius: 6px;
   border: 1px solid rgba(217, 224, 230);

@@ -90,7 +90,9 @@ export function ResetPasswordPage() {
         bgColor={theme.currentTheme.backgroundColor}
         shadow="2px 2px 4px rgba(0, 0, 0, 0.2)"
       >
-        <BackComponent />
+        <div style={{float: "left", width: "95%"}}>
+          <BackComponent />
+        </div>
         <Spacer size="large" />
         <AuthTypeText>
           password Reset

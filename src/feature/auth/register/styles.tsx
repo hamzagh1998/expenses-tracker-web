@@ -12,7 +12,8 @@ export const PolicyText = styled.div`
 export const InputsWrapper = styled.div`
   display: flex;
   align-items: start;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 8px;
   width: 100%;
   height: fit-content;
   margin: 0;

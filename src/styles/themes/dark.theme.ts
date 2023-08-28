@@ -10,4 +10,5 @@ export const darkTheme = {
   errorText: "#EE3A60",
   errorBackgroundColor: "#FFDCE3",
   accentColor: "#9C27B0",
+  shadow: "#0F223A4D"
 };

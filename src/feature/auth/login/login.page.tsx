@@ -14,7 +14,7 @@ import { setUserData } from "../slices/auth.slice";
 import { auth, googleProvider } from "../../../firebase";
 import { LoginI, RegisterI, useLoginMutation } from "../../../redux/services/auth.service";
 
-import { AuthContainer, AuthLogoContainer, AuthQuestionText, AuthTypeText, ErrorText, FlexContainer, GoogleButton, LinkText, OrLine } from "../../../styles/global-styles";
+import { AuthContainer, AuthLogoContainer, ContentContainer, AuthQuestionText, AuthTypeText, ErrorText, FlexContainer, GoogleButton, LinkText, OrLine, AuthTypeTextConatiner } from "../../../styles/global-styles";
 import { Spacer } from "../../../components/spacer/spacer";
 import { GenericBoxComponent } from "../../../components/genaric-box/generic-box.component";
 import { InputComponent } from "../../../components/input/input.component";
@@ -135,39 +135,41 @@ export function LoginPage() {
       <Spacer size="medium" />
       <GenericBoxComponent 
         height={518} 
-        width={410} 
+        width={380} 
         vCentred={false}
         padding={18}
         borderRadius={12} 
         bgColor={theme.currentTheme.backgroundColor}
         shadow="2px 2px 4px rgba(0, 0, 0, 0.2)"
       >
-        <Spacer size="large" />
-        <AuthTypeText>
-          Sign in
-        </AuthTypeText>
-        <Spacer size="large" />
-        <AuthQuestionText>
-          New to Expenses Tracker? <LinkText href="/auth/register">Create an account</LinkText> 
-        </AuthQuestionText>
-        <Spacer size="large" />
-        {
-          error.length
-            ? <GenericBoxComponent 
-                  height={48} 
-                  width={300} 
-                  padding={18}
-                  borderRadius={12} 
-                  bgColor={theme.currentTheme.errorBackgroundColor}
-              >
-                <ErrorText>
-                  {error}
-                </ErrorText>
-              </GenericBoxComponent>
-            : <></>
-        }
-        <Spacer size="large" />
-        <div>
+        <ContentContainer>
+          <Spacer size="large" />
+          <AuthTypeTextConatiner>
+            <AuthTypeText>
+              Sign in
+            </AuthTypeText>
+            <Spacer size="large" />
+            <AuthQuestionText>
+              New to Expenses Tracker? <LinkText href="/auth/register">Create an account</LinkText> 
+            </AuthQuestionText>
+          </AuthTypeTextConatiner>
+          <Spacer />
+          {
+            error.length
+              ? <GenericBoxComponent 
+                    height={48} 
+                    width={300} 
+                    padding={18}
+                    borderRadius={12} 
+                    bgColor={theme.currentTheme.errorBackgroundColor}
+                >
+                  <ErrorText>
+                    {error}
+                  </ErrorText>
+                </GenericBoxComponent>
+              : <></>
+          }
+          <Spacer size="large" />
           <InputComponent
             type="email"
             value={inputsInfo.email}
@@ -179,9 +181,7 @@ export function LoginPage() {
             ? <ErrorText style={{color: "#f00"}}>{inputsError.email}</ErrorText>
             : null
           }
-        </div>
-        <Spacer size="medium" />
-        <div>
+          <Spacer size="medium" />
           <InputComponent
             type={showPwd ? "text" : "password"}
             value={inputsInfo.password}
@@ -198,31 +198,31 @@ export function LoginPage() {
             ? <ErrorText style={{color: "#f00"}}>{inputsError.password}</ErrorText>
             : null
           }
-        </div>
-        <Spacer size="small" />
-        <FlexContainer>
-          <div></div>
-          <LinkText href="/auth/reset-password">Forgot your password?</LinkText>
-        </FlexContainer>
-        <Spacer size="large" />
-        <FlexContainer>
-          <OrLine />
-          Or
-          <OrLine />
-        </FlexContainer>
-        <Spacer size="large" />
-        <GoogleButton onClick={onGoogleSignIn}>
-          <FcGoogle size={26} />
-          Sign in with Google
-        </GoogleButton>
-        <Spacer size="large" />
-        <ButtonComponent 
-          text="Sign in" 
-          iconPosition="right"
-          spin={true}
-          icon={isLoding ? <ImSpinner2 size={20} /> : null} 
-          onClick={onLogin}
-        />
+          <Spacer size="small" />
+          <FlexContainer>
+            <div></div>
+            <LinkText href="/auth/reset-password">Forgot your password?</LinkText>
+          </FlexContainer>
+          <Spacer size="large" />
+          <FlexContainer>
+            <OrLine />
+            Or
+            <OrLine />
+          </FlexContainer>
+          <Spacer size="large" />
+          <GoogleButton onClick={onGoogleSignIn}>
+            <FcGoogle size={26} />
+            Sign in with Google
+          </GoogleButton>
+          <Spacer size="large" />
+          <ButtonComponent 
+            text="Sign in" 
+            iconPosition="right"
+            spin={true}
+            icon={isLoding ? <ImSpinner2 size={20} /> : null} 
+            onClick={onLogin}
+          />
+        </ContentContainer>
       </GenericBoxComponent>
     </AuthContainer>
   );

@@ -2,8 +2,8 @@ import React from "react";
 import styled, { CSSProperties } from "styled-components";
 
 interface Props {
-  height: number;
-  width: number;
+  height: number | string;
+  width: number | string;
   hCentred?: boolean;
   vCentred?: boolean;
   bgColor: string;
@@ -14,8 +14,8 @@ interface Props {
 }
 
 const Container = styled.div<Props>`
-  min-height: ${({ height }) => height}px;
-  min-width: ${({ width }) => width}px;
+  width: ${({ width }) => typeof width === "string" ? width : width + "px"};
+  height: ${({ height }) => typeof height === "string" ? height : height + "px"};
   background-color: ${({ bgColor }) => bgColor};
   padding: ${({ padding }) =>
     typeof padding === "number" ? padding + "px" : padding};
@@ -25,10 +25,11 @@ const Container = styled.div<Props>`
 
 const Wrapper = styled.div<Pick<Props, "hCentred" | "vCentred" | "height" | "width">>`
   display: flex;
+  flex-direction: column;
   justify-content: ${({ hCentred }) => (hCentred ? "center" : "left")};
   align-items: ${({ vCentred }) => (vCentred ? "center" : "top")};
-  min-width: ${({ width }) => width}px;
-  min-height: ${({ height }) => height}px;
+  width: ${({ width }) => typeof width === "string" ? width : width + "px"};
+  height: ${({ height }) => typeof height === "string" ? height : height + "px"};
   margin: 0;
   padding: 0;
 `;
@@ -60,9 +61,7 @@ export function GenericBoxComponent({
         height={height}
         width={width}
       >
-        <div>
-          {children}
-        </div>
+        {children}
       </Wrapper>
     </Container>
   );

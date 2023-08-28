@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { User, onAuthStateChanged } from "firebase/auth";
+import { User, applyActionCode, checkActionCode, onAuthStateChanged } from "firebase/auth";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 
 import { auth } from "../firebase";
 
 import { AuthRouter } from "./auth.router";
 import { MainRouter } from "./main.router";
-import { LoadingScreenComponent } from "../components/component/loading-screen.component";
+import { LoadingScreenComponent } from "../components/indicators/loading-screen.component";
 
 export function RoutersNavigator() {
-  const [userData, setUserData] = useState< User | null>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const location = useLocation();
   const navigate = useNavigate();
+
+  const [userData, setUserData] = useState< User | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
 
   useEffect(() => {
     onAuthStateChanged(auth, user => {    
@@ -33,13 +35,27 @@ export function RoutersNavigator() {
 
   const currentPath = location.pathname;
 
-  const authRoutes = ["/auth/login", "/auth/register", "/auth/reset-password", "/auth/new-password"];
-  const mainRoutes = ["/main/home", "/main/detail"];
+  const url = new URL(window.location.href);
+  const urlParams = new URLSearchParams(url.search);
+  
+  const mode = urlParams.get("mode");
+  const oobCode = urlParams.get("oobCode");  
 
+  if (mode && oobCode) localStorage.setItem("params", JSON.stringify({mode, oobCode}));
+
+  const authRoutes = ["/auth/login", "/auth/register", "/auth/reset-password", "/auth/new-password"];
+  const mainRoutes = ["/main/confirm-email", "/main/home", "/main/detail"];
+  
   useEffect(() => {
     if (!isLoggedIn && !authRoutes.includes(currentPath)) navigate("/auth/login");
-    else if (isLoggedIn && !mainRoutes.includes(currentPath)) navigate("/main/home");
-  }, [isLoggedIn, navigate]);
+    else if (isLoggedIn) {
+      if (!auth.currentUser?.emailVerified) {
+        navigate("/main/confirm-email");
+      } else if (!mainRoutes.includes(currentPath)) {
+        navigate("/main/home");
+      };
+    };
+  }, [isLoggedIn, mode, navigate]);
 
   return (
     <Routes>
