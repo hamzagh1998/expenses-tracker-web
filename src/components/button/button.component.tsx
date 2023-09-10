@@ -7,6 +7,7 @@ interface Props {
   text: string;
   height?: number;
   width?: number;
+  gap?: number;
   padding?: string | number;
   borderRadius?: number;
   borderColor?: string;
@@ -29,10 +30,10 @@ const spinAnimation = keyframes`
   }
 `;
 
-const CustomButton = styled.div<Pick<Props, "height" | "width" | "padding" | "borderRadius" | "borderColor" | "color" | "bgColor" | "hBgColor" | "disabled">>`
+const CustomButton = styled.div<Pick<Props, "height" | "width" | "padding" | "borderRadius" | "gap" | "borderColor" | "color" | "bgColor" | "hBgColor" | "disabled">>`
   display: flex;
   justify-content: center;
-  gap: 48px;
+  gap: ${({gap}) => gap}px;
   font-size: ${({ theme }) => theme.sizes.fonts.large};
   height: ${({ height }) => height}px;
   width: ${({ width }) => width}px;
@@ -63,12 +64,13 @@ const IconWrapper = styled.div<Pick<Props, "iconPosition"> & { spin?: boolean }>
 `;
 
 
-export function Button({
+export function ButtonComponent({
   text,
   height=26,
   width=330,
   padding=12,
   borderRadius=6,
+  gap=48,
   borderColor,
   color="#fff",
   bgColor,
@@ -94,6 +96,7 @@ export function Button({
       borderRadius={borderRadius}
       borderColor={borderColor}
       color={color}
+      gap={gap}
       bgColor={bgColor}
       hBgColor={hBgColor}
       disabled={disabled}

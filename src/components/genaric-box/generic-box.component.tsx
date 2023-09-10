@@ -1,9 +1,11 @@
 import React from "react";
-import styled, { CSSProperties } from "styled-components";
+import styled from "styled-components";
 
 interface Props {
-  height: number;
-  width: number;
+  height?: number | string;
+  width?: number | string;
+  minHeight?: number | string;
+  minHwidth?: number | string;
   hCentred?: boolean;
   vCentred?: boolean;
   bgColor: string;
@@ -14,8 +16,8 @@ interface Props {
 }
 
 const Container = styled.div<Props>`
-  height: ${({ height }) => height}px;
-  width: ${({ width }) => width}px;
+  width: ${({ width }) => typeof width === "string" ? width : width + "px"};
+  height: ${({ height }) => typeof height === "string" ? height : height + "px"};
   background-color: ${({ bgColor }) => bgColor};
   padding: ${({ padding }) =>
     typeof padding === "number" ? padding + "px" : padding};
@@ -23,19 +25,20 @@ const Container = styled.div<Props>`
   box-shadow: ${({ shadow }) => shadow};
 `;
 
-const Wrapper = styled.div<Pick<Props, "hCentred" | "vCentred">>`
+const Wrapper = styled.div<Pick<Props, "hCentred" | "vCentred" | "height" | "width">>`
   display: flex;
+  flex-direction: column;
   justify-content: ${({ hCentred }) => (hCentred ? "center" : "left")};
   align-items: ${({ vCentred }) => (vCentred ? "center" : "top")};
-  width: 100%;
-  height: 100%;
+  width: ${({ width }) => typeof width === "string" ? width : width + "px"};
+  height: ${({ height }) => typeof height === "string" ? height : height + "px"};
   margin: 0;
   padding: 0;
 `;
 
 export function GenericBoxComponent({
-  height,
-  width,
+  height="fit-content",
+  width="fit-content",
   hCentred=true,
   vCentred=true,
   bgColor,
@@ -44,6 +47,7 @@ export function GenericBoxComponent({
   shadow="none",
   children,
 }: Props) {
+  
   return (
     <Container
       height={height}
@@ -53,10 +57,13 @@ export function GenericBoxComponent({
       borderRadius={borderRadius}
       shadow={shadow}
     >
-      <Wrapper hCentred={hCentred} vCentred={vCentred}>
-        <div>
-          {children}
-        </div>
+      <Wrapper 
+        hCentred={hCentred} 
+        vCentred={vCentred}
+        height={height}
+        width={width}
+      >
+        {children}
       </Wrapper>
     </Container>
   );

@@ -32,6 +32,18 @@ export const AuthLogoContainer = styled.div`
   font-weight: bold;
 `;
 
+export const ContentContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  margin: auto;
+`;
+
+export const AuthTypeTextConatiner = styled.div`
+  width: 100%;
+  padding-left: 6px;
+  margin: 0;
+`;
 
 export const AuthTypeText = styled.p`
   font-family: MochiyRegular;
@@ -66,27 +78,29 @@ export const FlexContainer = styled.div`
   display: flex;
   font-family: Regular;
   justify-content: space-between;
+  color: ${({theme}) => theme.currentTheme.textColor};
   gap: 2.5px;
   align-items: center;
   font-size: 12px;
-  width: 100%;
+  width: 354px;
   height: fit-content;
 `;
 
 export const OrLine = styled.div`
   width: 100%;
   height: .1px;
-  background-color: #404E63;
+  background-color: ${({theme}) => theme.currentTheme.textColor};
   opacity: .3;
 `
 
 export const GoogleButton = styled.div`
   display: flex;
   font-family: Regular;
+  color: ${({theme}) => theme.currentTheme.textColor};
   justify-content: center;
   align-items: center;
   gap: 24px;
-  width: 100%;
+  width: 354px;
   height: 46px;
   border-radius: 6px;
   border: 1px solid rgba(217, 224, 230);
@@ -94,5 +108,25 @@ export const GoogleButton = styled.div`
 
   &:hover {
     background-color: #f9f9f9;
+    color: ${({theme}) => theme.currentTheme.primaryColorHover};
   }
+`;
+
+export const ErrorText = styled.p`
+  font-family: Regular;
+  font-size: ${({theme}) => theme.sizes.fonts.small};
+  color: ${({theme}) => theme.currentTheme.errorText};
+  text-align: left;
+  max-width: 300px;
+  margin: 0;
+  padding: 0;
+`;
+
+
+export const SuccessText = styled.p`
+  font-family: Regular;
+  font-size: ${({theme}) => theme.sizes.fonts.small};
+  color: ${({theme}) => theme.currentTheme.SuccessText};
+  max-width: 300px;
+  margin: 0;
 `;
