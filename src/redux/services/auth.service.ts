@@ -19,6 +19,11 @@ export interface RegisterI {
   provider: Provider;
 };
 
+export interface ResetPasswordI {
+  password: string;
+  oobCode: string | null;
+};
+
 export const authApi = api.injectEndpoints({
   endpoints: (build) => ({
     login: build.mutation({
@@ -26,7 +31,7 @@ export const authApi = api.injectEndpoints({
         url: "auth/login",
         method: "POST",
         body: payload,
-      }),
+      })
     }),
 
     register: build.mutation({
@@ -34,10 +39,18 @@ export const authApi = api.injectEndpoints({
         url: "auth/register",
         method: "POST",
         body: payload,
-      }),
+      })
     }),
-  }),
+
+    resetPassword: build.mutation({
+      query: (payload: ResetPasswordI) => ({
+        url: "auth/new-password",
+        method: "POST",
+        body: payload,
+      })
+    })
+  })
 });
 
-export const { useLoginMutation, useRegisterMutation } = authApi;
+export const { useLoginMutation, useRegisterMutation, useResetPasswordMutation } = authApi;
 

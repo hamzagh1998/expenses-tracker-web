@@ -22,15 +22,17 @@ import logo from "../../../assets/logo.png";
 
 import { tryToCatch } from "../../../utils/try-to-catch";
 import { BackComponent } from "../../../components/back/back.component";
+// import { useResetPasswordMutation } from "../../../redux/services/auth.service";
 
 
 export function NewPasswordPage() {
 
-  const [searchParams] = useSearchParams();
-
   const navigate = useNavigate();
 
   const theme: any = useTheme();  
+
+  // Create the useLoginMutation hook  
+  // const [resetPasswordMutation] = useResetPasswordMutation();
 
   const [password, setPassword] = useState({password: "", confirmPassword: ""});
   const [passwordError, setPasswordError] = useState({password: "", confirmPassword: ""});
@@ -80,6 +82,7 @@ export function NewPasswordPage() {
         setError(errorType === "invalid-action-code" ? "Invalid action" : "Something went wrong!");
         setPassword({password: "", confirmPassword: ""});
       } else {
+        // resetPasswordMutation({password: password.password, oobCode})
         setSuccess("Your new password has been saved!");
         localStorage.removeItem("params");
       };
