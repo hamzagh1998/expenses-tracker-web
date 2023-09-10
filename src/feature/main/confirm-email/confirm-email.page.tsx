@@ -2,11 +2,15 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTheme } from "styled-components";
 import { applyActionCode, checkActionCode, signOut } from "firebase/auth";
+import { IoMdLogOut } from "react-icons/io";
+import { TfiReload } from "react-icons/tfi";
 
 import { auth } from "../../../firebase";
 
 import { ButtonComponent } from "../../../components/button/button.component";
+import { FlexBoxComponent } from "../../../components/flex-box/flex-box.component";
 import { GenericBoxComponent } from "../../../components/genaric-box/generic-box.component";
+import { LoadingScreenComponent } from "../../../components/indicators/loading-screen.component";
 
 import { Text, Title } from "./styles";
 
@@ -17,7 +21,6 @@ import { Spacer } from "../../../components/spacer/spacer";
 import { ErrorText } from "../../../styles/global-styles";
 
 import { screenSizeInInches } from "../../../utils/screen-size-in-inch";
-import { LoadingScreenComponent } from "../../../components/indicators/loading-screen.component";
 
 
 export function ConfirmEmailPage() {
@@ -108,11 +111,28 @@ export function ConfirmEmailPage() {
                   Thank you for signing up! We've just sent you a confirmation link to your email address.
                   Please check your inbox. In case you can't find it, remember to check your spam folder as well.
                 </Text>
-                <ButtonComponent 
-                  text="Sign out" 
-                  width={200}
-                  onClick={onSignOut}
-                />
+                <FlexBoxComponent gap={12}>
+                  <ButtonComponent 
+                    text="Refresh" 
+                    width={150}
+                    gap={10}
+                    padding="12px 6px"
+                    bgColor={theme.currentTheme.successColor}
+                    hBgColor={theme.currentTheme.successColorHover}
+                    icon={<TfiReload size={20} />}
+                    onClick={() => window.location.reload()}
+                  />
+                  <ButtonComponent 
+                    text="Sign out" 
+                    width={150}
+                    gap={10}
+                    padding="12px 6px"
+                    bgColor={theme.currentTheme.errorText}
+                    hBgColor={theme.currentTheme.errorTextHover}
+                    icon={<IoMdLogOut size={24} />}
+                    onClick={onSignOut}
+                  />
+                </FlexBoxComponent>
                 <Spacer size="large" />
                 {
                   error

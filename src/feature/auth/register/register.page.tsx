@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { createUserWithEmailAndPassword, sendEmailVerification, signInWithPopup, GoogleAuthProvider, deleteUser } from "firebase/auth";
+import { BsEye } from "react-icons/bs";
+import { PiEyeClosedLight } from "react-icons/pi";
+import { FcGoogle } from "react-icons/fc";
+import { ImSpinner2 } from "react-icons/im";
 import { useDispatch } from "react-redux";
 import { useTheme } from "styled-components";
 import { object, string } from "yup";
@@ -13,14 +17,11 @@ import { RegisterI, useRegisterMutation } from "../../../redux/services/auth.ser
 import { GenericBoxComponent } from "../../../components/genaric-box/generic-box.component";
 import { Spacer } from "../../../components/spacer/spacer";
 import { InputComponent } from "../../../components/input/input.component";
-import { BsEye } from "react-icons/bs";
-import { PiEyeClosedLight } from "react-icons/pi";
-import { FcGoogle } from "react-icons/fc";
+import { FlexBoxComponent } from "../../../components/flex-box/flex-box.component";
 import { ButtonComponent } from "../../../components/button/button.component";
-import { ImSpinner2 } from "react-icons/im";
 
 import { AuthContainer, AuthLogoContainer, AuthQuestionText, AuthTypeText, AuthTypeTextConatiner, ContentContainer, ErrorText, FlexContainer, GoogleButton, LinkText, OrLine } from "../../../styles/global-styles";
-import { InputsWrapper, PolicyText } from "./styles";
+import { PolicyText } from "./styles";
 
 import { tryToCatch } from "../../../utils/try-to-catch";
 
@@ -147,8 +148,7 @@ export function RegisterPage() {
       </AuthLogoContainer>
       <Spacer size="medium" />
       <GenericBoxComponent 
-        height={572} 
-        width={380} 
+        width={365} 
         vCentred={false}
         padding={18}
         borderRadius={12} 
@@ -171,7 +171,7 @@ export function RegisterPage() {
             error.length
               ? <GenericBoxComponent 
                     height={48} 
-                    width={300} 
+                    width={320} 
                     vCentred={true}
                     padding={18}
                     borderRadius={12} 
@@ -184,8 +184,8 @@ export function RegisterPage() {
               : <></>
           }
           <Spacer size="medium" />
-          <InputsWrapper>
-            <>
+          <FlexBoxComponent justifyContent="space-between">
+            <FlexBoxComponent flexDirection="column" alignItems="flex-start">
               <InputComponent
                 type="text"
                 width={150}
@@ -195,11 +195,11 @@ export function RegisterPage() {
                 setValue={(value: string) => handleInput("firstName", value)}    
               />
               { inputsError.firstName 
-                ? <ErrorText style={{color: "#f00"}}>{inputsError.firstName}</ErrorText>
+                ? <ErrorText>{inputsError.firstName}</ErrorText>
                 : null
               }
-            </>
-            <>
+            </FlexBoxComponent>
+            <FlexBoxComponent flexDirection="column" alignItems="flex-start">
               <InputComponent
                 type="text"
                 width={150}
@@ -209,11 +209,11 @@ export function RegisterPage() {
                 setValue={(value: string) => handleInput("lastName", value)}        
               />
               { inputsError.lastName 
-                  ? <ErrorText style={{color: "#f00"}}>{inputsError.lastName}</ErrorText>
+                  ? <ErrorText>{inputsError.lastName}</ErrorText>
                   : null
               }
-            </>
-          </InputsWrapper>
+            </FlexBoxComponent>
+          </FlexBoxComponent>
           <Spacer size="medium" />
           <InputComponent
             type="email"
@@ -223,7 +223,7 @@ export function RegisterPage() {
             setValue={(value: string) => handleInput("email", value)}        
           />
           { inputsError.email 
-              ? <ErrorText style={{color: "#f00"}}>{inputsError.email}</ErrorText>
+              ? <ErrorText>{inputsError.email}</ErrorText>
               : null
           }
           <Spacer size="medium" />
@@ -240,7 +240,7 @@ export function RegisterPage() {
             }      
           />
           { inputsError.password 
-              ? <ErrorText style={{color: "#f00"}}>{inputsError.password}</ErrorText>
+              ? <ErrorText>{inputsError.password}</ErrorText>
               : null
           }
           <Spacer size="large" />

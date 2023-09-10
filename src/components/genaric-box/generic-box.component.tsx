@@ -1,9 +1,11 @@
 import React from "react";
-import styled, { CSSProperties } from "styled-components";
+import styled from "styled-components";
 
 interface Props {
-  height: number | string;
-  width: number | string;
+  height?: number | string;
+  width?: number | string;
+  minHeight?: number | string;
+  minHwidth?: number | string;
   hCentred?: boolean;
   vCentred?: boolean;
   bgColor: string;
@@ -35,8 +37,8 @@ const Wrapper = styled.div<Pick<Props, "hCentred" | "vCentred" | "height" | "wid
 `;
 
 export function GenericBoxComponent({
-  height,
-  width,
+  height="fit-content",
+  width="fit-content",
   hCentred=true,
   vCentred=true,
   bgColor,

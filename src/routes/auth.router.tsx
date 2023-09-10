@@ -4,7 +4,7 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import { LoginPage } from "../feature/auth/login/login.page";
 import { RegisterPage } from "../feature/auth/register/register.page";
 import { ResetPasswordPage } from "../feature/auth/reset-password/reset-password.page";
-import { NewPasswordPage } from "../feature/auth/new-password/new-password";
+import { NewPasswordPage } from "../feature/auth/new-password/new-password.page";
 
 
 export const AuthRouter = () => {

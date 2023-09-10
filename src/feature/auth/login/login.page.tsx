@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, deleteUser } from "firebase/auth";
 import { object, string } from "yup";
@@ -14,11 +15,12 @@ import { setUserData } from "../slices/auth.slice";
 import { auth, googleProvider } from "../../../firebase";
 import { LoginI, RegisterI, useLoginMutation } from "../../../redux/services/auth.service";
 
-import { AuthContainer, AuthLogoContainer, ContentContainer, AuthQuestionText, AuthTypeText, ErrorText, FlexContainer, GoogleButton, LinkText, OrLine, AuthTypeTextConatiner } from "../../../styles/global-styles";
 import { Spacer } from "../../../components/spacer/spacer";
 import { GenericBoxComponent } from "../../../components/genaric-box/generic-box.component";
 import { InputComponent } from "../../../components/input/input.component";
 import { ButtonComponent } from "../../../components/button/button.component";
+
+import { AuthContainer, AuthLogoContainer, ContentContainer, AuthQuestionText, AuthTypeText, ErrorText, FlexContainer, GoogleButton, LinkText, OrLine, AuthTypeTextConatiner } from "../../../styles/global-styles";
 
 import logo from "../../../assets/logo.png";
 
@@ -28,6 +30,8 @@ import { tryToCatch } from "../../../utils/try-to-catch";
 export function LoginPage() {
 
   const dispatch = useDispatch();
+
+  const navigate = useNavigate();
 
   const theme: any = useTheme();  
 
@@ -41,7 +45,18 @@ export function LoginPage() {
   const [isLoding, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
-  let loginSchema = object({
+  const params = JSON.parse(localStorage.getItem("params")!);  
+
+  const mode: string | null = params ? params.mode : null;
+  const oobCode: string | null = params ? params.oobCode : null;
+  
+  useEffect(() => {
+    if (oobCode && mode) {
+      if (mode === "resetPassword") navigate("/auth/new-password");
+    };
+  }, [oobCode, mode]);
+
+  const loginSchema = object({
     email: string().email("Pls enter a valid email address!").required("Email is required!"),
     password: string().min(6).required("Password is required!"),
   });
@@ -68,9 +83,10 @@ export function LoginPage() {
       if (error) {
         const errorCode = error.code;
         const errorType = errorCode.split("/")[1];
-        const emailError = "Incorrect email. Please enter it again."
-        const passwordError = "Incorrect password. Please enter it again."      
-        setError(errorType === "invalid-email" ? emailError : passwordError);
+        const emailError = "No account found for this email. Please check your email or sign up."
+        const passwordError = "Password is incorrect. Please re-enter your password."      
+        console.log(errorType);
+        setError(errorType === "user-not-found" ? emailError : passwordError);
       } else {
         const userFbToken = userCredential?.user?.accessToken; // firbase access token
         const { email, password } = inputsInfo; // Extract required fields
@@ -134,8 +150,7 @@ export function LoginPage() {
       </AuthLogoContainer>
       <Spacer size="medium" />
       <GenericBoxComponent 
-        height={518} 
-        width={380} 
+        width={365}
         vCentred={false}
         padding={18}
         borderRadius={12} 
@@ -158,7 +173,7 @@ export function LoginPage() {
             error.length
               ? <GenericBoxComponent 
                     height={48} 
-                    width={300} 
+                    width={320} 
                     padding={18}
                     borderRadius={12} 
                     bgColor={theme.currentTheme.errorBackgroundColor}
@@ -178,7 +193,7 @@ export function LoginPage() {
             setValue={(value: string) => handleInput("email", value)}        
           />
           { inputsError.email 
-            ? <ErrorText style={{color: "#f00"}}>{inputsError.email}</ErrorText>
+            ? <ErrorText>{inputsError.email}</ErrorText>
             : null
           }
           <Spacer size="medium" />
@@ -195,7 +210,7 @@ export function LoginPage() {
             }      
           />
           { inputsError.password 
-            ? <ErrorText style={{color: "#f00"}}>{inputsError.password}</ErrorText>
+            ? <ErrorText>{inputsError.password}</ErrorText>
             : null
           }
           <Spacer size="small" />

@@ -38,6 +38,7 @@ export function BackComponent({text="Back", link, color, hColor, size="medium", 
   const theme: any = useTheme();
 
   const onBack = () => {
+    localStorage.removeItem("params");
     link
       ? navigate(link) // navigate to another route
       : navigate(-1); // Back to the previous page

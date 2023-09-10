@@ -34,14 +34,14 @@ export const AuthLogoContainer = styled.div`
 
 export const ContentContainer = styled.div`
   display: flex;
-  align-items: center;
   justify-content: center;
   flex-direction: column;
+  margin: auto;
 `;
 
 export const AuthTypeTextConatiner = styled.div`
   width: 100%;
-  padding-left: 30px;
+  padding-left: 6px;
   margin: 0;
 `;
 
@@ -116,6 +116,7 @@ export const ErrorText = styled.p`
   font-family: Regular;
   font-size: ${({theme}) => theme.sizes.fonts.small};
   color: ${({theme}) => theme.currentTheme.errorText};
+  text-align: left;
   max-width: 300px;
   margin: 0;
   padding: 0;

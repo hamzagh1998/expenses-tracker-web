@@ -11,6 +11,7 @@ import { GenericBoxComponent } from "../../../components/genaric-box/generic-box
 import { InputComponent } from "../../../components/input/input.component";
 import { ButtonComponent } from "../../../components/button/button.component";
 import { BackComponent } from "../../../components/back/back.component";
+import { FlexBoxComponent } from "../../../components/flex-box/flex-box.component";
 
 import { AuthContainer, AuthLogoContainer, AuthTypeText, ErrorText, SuccessText } from "../../../styles/global-styles";
 import { HintText } from "./styles";
@@ -57,7 +58,7 @@ export function ResetPasswordPage() {
         const errorCode = error.code;
         const errorType = errorCode.split("/")[1];      
         const emailError = "Incorrect email. Please enter it again!"
-        const userNotFoundError = "No user exists with this email!"              
+        const userNotFoundError = "No account found for this email!"              
         setError(errorType === "invalid-email" ? emailError : userNotFoundError);
         setEmail("");
       } else {
@@ -81,8 +82,7 @@ export function ResetPasswordPage() {
       </AuthLogoContainer>
       <Spacer size="medium" />
       <GenericBoxComponent 
-        height={338} 
-        width={410} 
+        width={365} 
         vCentred={true}
         hCentred={true}
         padding={18}
@@ -105,8 +105,7 @@ export function ResetPasswordPage() {
         {
           success.length && !error.length
             ? <GenericBoxComponent 
-                  height={48} 
-                  width={300} 
+                  width={320} 
                   padding={18}
                   borderRadius={12} 
                   bgColor={theme.currentTheme.successBackgroundColor}
@@ -121,7 +120,7 @@ export function ResetPasswordPage() {
           error.length
             ? <GenericBoxComponent 
                   height={48} 
-                  width={300} 
+                  width={320} 
                   padding={18}
                   borderRadius={12} 
                   bgColor={theme.currentTheme.errorBackgroundColor}
@@ -133,17 +132,19 @@ export function ResetPasswordPage() {
             : <></>
         }
         <Spacer size="small" />
-        <InputComponent
-          type="email"
-          value={email}
-          placeholder="Email"
-          error={emailError.length > 0}
-          setValue={handleInput}        
-        />
-        { emailError.length
-            ? <ErrorText style={{color: "#f00"}}>{emailError}</ErrorText>
-            : null
-        }
+        <FlexBoxComponent flexDirection="column" alignItems="flex-start">
+          <InputComponent
+            type="email"
+            value={email}
+            placeholder="Email"
+            error={emailError.length > 0}
+            setValue={handleInput}        
+          />
+          { emailError.length
+              ? <ErrorText>{emailError}</ErrorText>
+              : null
+          }
+        </FlexBoxComponent>
         <Spacer size="large" />
         <ButtonComponent 
           text="Send reset link" 

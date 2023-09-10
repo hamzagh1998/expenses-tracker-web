@@ -6,8 +6,10 @@ export const lightTheme = {
   backgroundColor: "#FFFFFF",
   textColor: "#212121",
   successColor: "#00C1A2",
+  successColorHover: "#008E77",
   successBackgroundColor: "#C1FFF5",
   errorText: "#EE3A60",
+  errorTextHover: "#E2133F",
   errorBackgroundColor: "#FFDCE3",
   accentColor: "#9C27B0",
   shadow: "#0F223A4D"
